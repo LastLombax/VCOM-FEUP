@@ -31,13 +31,20 @@ gradient = cv2.convertScaleAbs(gradient)
 blurred = cv2.blur(gradient, (9, 9))
 (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
 
+cv2.imshow("cenas1", blurred)
+
 # construct a closing kernel and apply it to the thresholded image
-kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 7))
+kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 7))  #TODO: Change this tuple. Original was (21,7)
 closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+
+cv2.imshow("cenas2", closed)
 
 # perform a series of erosions and dilations
 closed = cv2.erode(closed, None, iterations = 4)
 closed = cv2.dilate(closed, None, iterations = 4)
+
+cv2.imshow("cenas3", closed)
+
 
 # find the contours in the thresholded image, then sort the contours
 # by their area, keeping only the largest one
@@ -51,7 +58,8 @@ rect = cv2.minAreaRect(c)
 box = cv2.cv.BoxPoints(rect) if imutils.is_cv2() else cv2.boxPoints(rect)
 box = np.int0(box)
 
-# draw a bounding box arounded the detected barcode and display the image
+# draw a bounding box arounded the detected barcode and display the
+# image
 cv2.drawContours(image, [box], -1, (0, 255, 0), 3)
 cv2.imshow("Image", image)
 cv2.waitKey(0)
