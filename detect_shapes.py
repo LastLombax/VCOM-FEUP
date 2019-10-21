@@ -12,15 +12,16 @@ class ShapeDetector:
 		# initialize the shape name and approximate the contour
 		shape = "unidentified"
 		peri = cv2.arcLength(c, True)
-		approx = cv2.approxPolyDP(c, 0.04 * peri, True) 
+		# O valor no peri diferencia a shape detetada
+		approx = cv2.approxPolyDP(c, 0.005 * peri, True) 
 
         # if the shape is a triangle, it will have 3 vertices
-		#if len(approx) == 3:
-			#shape = "triangle"
+		if len(approx) == 3:
+			shape = "triangle"
  
 		# if the shape has 4 vertices, it is either a square or
 		# a rectangle
-		if len(approx) <= 2:
+		if len(approx) == 4:
 			# compute the bounding box of the contour and use the
 			# bounding box to compute the aspect ratio
 			(x, y, w, h) = cv2.boundingRect(approx)
@@ -31,12 +32,12 @@ class ShapeDetector:
 			shape = "square" if ar >= 0.95 and ar <= 1.05 else "rectangle"
  
 		# if the shape is a pentagon, it will have 5 vertices
-		#elif len(approx) == 5:
-			#shape = "pentagon"
+		elif len(approx) == 5:
+			shape = "pentagon"
  
 		# otherwise, we assume the shape is a circle
-		#else:
-			#shape = "circle"
+		else:
+			shape = "circle"
  
 		# return the name of the shape
 		return shape
@@ -51,7 +52,8 @@ args = vars(ap.parse_args())
 # load the image and resize it to a smaller factor so that
 # the shapes can be approximated better
 image = cv2.imread(args["image"])
-resized = imutils.resize(image, width=300)
+# Este resize funciona melhor com valores altos
+resized = imutils.resize(image, width=1000)
 ratio = image.shape[0] / float(resized.shape[0])
  
 # convert the resized image to grayscale, blur it slightly,
@@ -66,6 +68,8 @@ cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
 	cv2.CHAIN_APPROX_SIMPLE)
 cnts = imutils.grab_contours(cnts)
 sd = ShapeDetector()
+
+# print(cnts.size)
 
 # loop over the contours
 for c in cnts:
