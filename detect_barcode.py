@@ -19,7 +19,7 @@ gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 # compute the Scharr gradient magnitude representation of the images
 # in both the x and y direction using OpenCV 2.4
-ddepth = cv2.cv.CV_32F if imutils.is_cv2() else cv2.CV_32F
+ddepth = cv2.CV_32F
 gradX = cv2.Sobel(gray, ddepth=ddepth, dx=1, dy=0, ksize=-1)
 gradY = cv2.Sobel(gray, ddepth=ddepth, dx=0, dy=1, ksize=-1)
 
@@ -31,20 +31,31 @@ gradient = cv2.convertScaleAbs(gradient)
 blurred = cv2.blur(gradient, (9, 9))
 (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
 
-cv2.imshow("cenas1", blurred)
 
 # construct a closing kernel and apply it to the thresholded image
-kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 7))  #TODO: Change this tuple. Original was (21,7)
-closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 7))  #TODO: Change this tuple. Original was (21,7)
+aux = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
-cv2.imshow("cenas2", closed)
+concat1 = np.hstack((blurred, aux))
 
 # perform a series of erosions and dilations
-closed = cv2.erode(closed, None, iterations = 4)
+closed = cv2.erode(aux, None, iterations = 4)
 closed = cv2.dilate(closed, None, iterations = 4)
 
-cv2.imshow("cenas3", closed)
+concat2 = np.hstack((concat1, closed))
 
+
+# Shows all in one window
+screen_res = 1440, 1080
+scale_width = screen_res[0] / concat2.shape[1]
+scale_height = screen_res[1] / concat2.shape[0]
+scale = min(scale_width, scale_height)
+window_width = int(concat2.shape[1] * scale)
+window_height = int(concat2.shape[0] * scale)
+cv2.namedWindow('Resized Window', cv2.WINDOW_NORMAL)
+cv2.resizeWindow('Resized Window', window_width, window_height)
+
+cv2.imshow('Resized Window', concat2)
 
 # find the contours in the thresholded image, then sort the contours
 # by their area, keeping only the largest one
