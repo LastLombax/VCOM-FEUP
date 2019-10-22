@@ -2,6 +2,7 @@
 import argparse
 import imutils
 import cv2
+import numpy as np
 
 
 class ShapeDetector:
@@ -52,6 +53,20 @@ args = vars(ap.parse_args())
 # load the image and resize it to a smaller factor so that
 # the shapes can be approximated better
 image = cv2.imread(args["image"])
+
+# Converter para o colourspace HSV
+hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+# Definir os limites da cor "Preto"
+black_lo = np.array([0, 0, 0])
+black_hi = np.array([360, 128, 128])
+# Criar mask ara selecionar "pretos"
+mask = cv2.inRange(hsv, black_lo, black_hi)
+# Mudar os "pretos" para "preto" puro
+image[mask > 0] = (0, 0, 0)
+
+cv2.imshow("Imagem mascarada", image)
+cv2.waitKey(0)
+
 # Este resize funciona melhor com valores altos
 resized = imutils.resize(image, width=1000)
 ratio = image.shape[0] / float(resized.shape[0])
