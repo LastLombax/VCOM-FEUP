@@ -58,7 +58,7 @@ image = cv2.imread(args["image"])
 hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 # Definir os limites da cor "Preto" <------ TODO: Definir valores de acordo com a imagem em vez de hard-coded (if possible)
 black_lo = np.array([0, 0, 0])
-black_hi = np.array([360, 180, 180])
+black_hi = np.array([360, 150, 150])
 # Criar mask ara selecionar "pretos"
 mask = cv2.inRange(hsv, black_lo, black_hi)
 # Mudar os "pretos" para preto puro e "brancos" para branco puro
@@ -98,9 +98,9 @@ for c in cnts:
 	c = c.astype("float")
 	c *= ratio
 	c = c.astype("int")
-	cv2.drawContours(image, [c], -1, (0, 255, 0), 2)
-	cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,
-		0.5, (255, 255, 255), 2)
+	cv2.drawContours(image, [c], -1, (0, 0, 255), 1)
+	# cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,
+	# 	0.5, (255, 255, 255), 2)
  
 	# show the output image
 	cv2.imshow("Image", image)
