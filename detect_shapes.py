@@ -56,9 +56,9 @@ image = cv2.imread(args["image"])
 
 # Converter para o colourspace HSV
 hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-# Definir os limites da cor "Preto"
+# Definir os limites da cor "Preto" <---------------------------------------- TODO: Definir valores de acordo com a imagem em vez de hard-coded
 black_lo = np.array([0, 0, 0])
-black_hi = np.array([360, 128, 128])
+black_hi = np.array([360, 180, 180])
 # Criar mask ara selecionar "pretos"
 mask = cv2.inRange(hsv, black_lo, black_hi)
 # Mudar os "pretos" para "preto" puro
