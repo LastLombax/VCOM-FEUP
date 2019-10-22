@@ -45,7 +45,7 @@ cnts = imutils.grab_contours(cnts)
 for c in cnts:
  
 	# multiply the contour (x, y)-coordinates by the resize ratio,
-	# then draw the contours and the name of the shape on the image
+	# then draw the contours on the image
 	c = c.astype("float")
 	c *= ratio
 	c = c.astype("int")
