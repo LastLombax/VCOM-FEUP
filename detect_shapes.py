@@ -98,7 +98,7 @@ for c in cnts:
 	c = c.astype("float")
 	c *= ratio
 	c = c.astype("int")
-	cv2.drawContours(image, [c], -1, (0, 0, 255), 1)
+	cv2.drawContours(image, [c], -1, (0, 255, 0), 1)
 	# cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,
 	# 	0.5, (255, 255, 255), 2)
  
