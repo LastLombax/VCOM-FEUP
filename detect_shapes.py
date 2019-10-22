@@ -10,22 +10,24 @@ ap.add_argument("-i", "--image", required=True,
 	help="path to the input image")
 args = vars(ap.parse_args())
 
-# load the image and resize it to a smaller factor so that
-# the shapes can be approximated better
+# load the image
 image = cv2.imread(args["image"])
 
-# Converter para o colourspace HSV
+# Convert to HSV colourspace
 hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-# Definir os limites da cor "Preto" <------ TODO: Definir valores de acordo com a imagem em vez de hard-coded (if possible)
+
+# Define the limits of the "black" colour <------ TODO: Definir valores de acordo com a imagem em vez de hard-coded (if possible)
 black_lo = np.array([0, 0, 0])
 black_hi = np.array([360, 150, 150])
-# Criar mask ara selecionar "pretos"
+
+# Create mask to select "blacks"
 mask = cv2.inRange(hsv, black_lo, black_hi)
-# Mudar os "pretos" para preto puro e "brancos" para branco puro
+
+# Change "blacks" to pure black and "whites" to pure white
 image[mask > 0] = (0, 0, 0)
 image[mask <= 0] = (255, 255, 255)
 
-# Este resize funciona melhor com valores altos
+# Resize de image to a decent size
 resized = imutils.resize(image, width=1000)
 ratio = image.shape[0] / float(resized.shape[0])
  
@@ -35,10 +37,8 @@ gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
 blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY)[1]
  
-# find contours in the thresholded image and initialize the
-# shape detector
-cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
-	cv2.CHAIN_APPROX_SIMPLE)
+# find contours in the thresholded image
+cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 cnts = imutils.grab_contours(cnts)
 
 # loop over the contours
