@@ -28,8 +28,8 @@ gradient = cv2.subtract(gradX, gradY)
 gradient = cv2.convertScaleAbs(gradient)
 
 # blur and threshold the image
-blurred = cv2.blur(gradient, (9, 9))
-(_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
+blurred = cv2.bilateralFilter(gradient, 5, 20, 20) 	
+(_, thresh) = cv2.threshold(blurred, 55, 255, cv2.THRESH_BINARY)
 
 
 # construct a closing kernel and apply it to the thresholded image
