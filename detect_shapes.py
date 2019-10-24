@@ -65,6 +65,9 @@ for c in cnts:
 	# w and h are the width and height, respectively
 	(x, y, w, h) = cv2.boundingRect(c)
 	print((x, y, w, h))
+
+	# Paint the center of the bounding rectangle
+	cv2.circle(image, (x + int(w/2), y + int(h/2)), 1, (255, 0, 0), 2)
  
 	# show the output image
 	cv2.imshow("Image", image)
