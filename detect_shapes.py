@@ -49,7 +49,16 @@ for c in cnts:
 	c = c.astype("float")
 	c *= ratio
 	c = c.astype("int")
-	cv2.drawContours(image, [c], -1, (0, 255, 0), 1)
+
+	# Detect the smallest bounding rectangle of the contour,
+	# allowing the rectangle to be rotated.
+	# (This could prove useful when bars are askew)
+	rect = cv2.minAreaRect(c)
+	box = cv2.boxPoints(rect)
+	box = np.int0(box)
+
+	# Draw the smallest bounding rectangle for now
+	cv2.drawContours(image, [box], -1, (0, 255, 0), 2)
 
 	# Detect the bounding rectangle of the contour
 	# x and y are the coordinates of the top left vertice
