@@ -28,9 +28,8 @@ gradient = cv2.subtract(gradX, gradY)
 gradient = cv2.convertScaleAbs(gradient)
 
 # blur and threshold the image
-blurred = cv2.bilateralFilter(gradient, 5, 20, 20) 	
-(_, thresh) = cv2.threshold(blurred, 55, 255, cv2.THRESH_BINARY)
-
+blurred = cv2.blur(gradient, (9,9)) 	
+(_, thresh) = cv2.threshold(blurred, 223, 255, cv2.THRESH_BINARY)
 
 # construct a closing kernel and apply it to the thresholded image
 kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 7))  #TODO: Change this tuple. Original was (21,7)
@@ -71,6 +70,7 @@ box = np.int0(box)
 
 # draw a bounding box arounded the detected barcode and display the
 # image
-cv2.drawContours(image, [box], -1, (0, 255, 0), 3)
+cv2.drawContours(image, [box], -1, (0, 255, 0), 1
+)
 cv2.imshow("Image", image)
 cv2.waitKey(0)
