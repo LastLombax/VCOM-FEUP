@@ -16,9 +16,9 @@ image = cv2.imread(args["image"])
 # Convert to HSV colourspace
 hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-# Define the limits of the "black" colour <------ TODO: Definir valores de acordo com a imagem em vez de hard-coded (if possible)
+# Define the limits of the "black" colour <------ TODO: Definir Value de acordo com a imagem em vez de hard-coded (if possible)
 black_lo = np.array([0, 0, 0])
-black_hi = np.array([360, 150, 150])
+black_hi = np.array([360, 255, 150])
 
 # Create mask to select "blacks"
 mask = cv2.inRange(hsv, black_lo, black_hi)
