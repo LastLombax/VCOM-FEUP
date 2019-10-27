@@ -3,6 +3,29 @@ import argparse
 import imutils
 import cv2
 import numpy as np
+
+# WIP: This isn't as straightforward as it seemed to be
+def findMidValue(hsvImage):
+	
+	rows, cols, chan = hsvImage.shape
+	values = []
+	
+	for i in range(rows):
+		for j in range(cols):
+			values.append(hsvImage[i,j,2])
+	values.sort()
+
+	# print(hsvImage)
+
+	maxDiff = 0
+	maxDiffIdx = 0
+	for i in range(len(values) - 1):
+		if values[i + 1] - values[i] > maxDiff:
+			maxDiff = values[i + 1] - values[i]
+			maxDiffIdx = i
+
+	return values[maxDiffIdx] + int(maxDiff / 2)
+
  
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -18,7 +41,7 @@ hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
 # Define the limits of the "black" colour <------ TODO: Definir Value de acordo com a imagem em vez de hard-coded (if possible)
 black_lo = np.array([0, 0, 0])
-black_hi = np.array([360, 255, 150])
+black_hi = np.array([360, 255, 128])
 
 # Create mask to select "blacks"
 mask = cv2.inRange(hsv, black_lo, black_hi)
@@ -64,7 +87,7 @@ for c in cnts:
 	# x and y are the coordinates of the top left vertice
 	# w and h are the width and height, respectively
 	(x, y, w, h) = cv2.boundingRect(c)
-	print((x, y, w, h))
+	# print((x, y, w, h))
 
 	# Paint the center of the bounding rectangle
 	cv2.circle(image, (x + int(w/2), y + int(h/2)), 1, (255, 0, 0), 2)
