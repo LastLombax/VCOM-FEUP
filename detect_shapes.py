@@ -2,6 +2,7 @@
 import imutils
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
 # WIP: This isn't as straightforward as it seemed to be
 def findMidValue(hsvImage):
@@ -24,6 +25,40 @@ def findMidValue(hsvImage):
 			maxDiffIdx = i
 
 	return values[maxDiffIdx] + int(maxDiff / 2)
+
+def estimate_coef(x, y): 
+    # number of observations/points 
+    n = np.size(x) 
+  
+    # mean of x and y vector 
+    m_x, m_y = np.mean(x), np.mean(y) 
+  
+    # calculating cross-deviation and deviation about x 
+    SS_xy = np.sum(y*x) - n*m_y*m_x 
+    SS_xx = np.sum(x*x) - n*m_x*m_x 
+  
+    # calculating regression coefficients 
+    b_1 = SS_xy / SS_xx 
+    b_0 = m_y - b_1*m_x 
+  
+    return(b_0, b_1) 
+  
+def plot_regression_line(x, y, b): 
+    # plotting the actual points as scatter plot 
+    plt.scatter(x, y, color = "m", marker = "o", s = 30) 
+  
+    # predicted response vector 
+    y_pred = b[0] + b[1]*x 
+  
+    # plotting the regression line 
+    plt.plot(x, y_pred, color = "g") 
+  
+    # putting labels 
+    plt.xlabel('x') 
+    plt.ylabel('y') 
+  
+    # function to show plot 
+    plt.show() 
 
 
 def shape_detection(image):
@@ -55,6 +90,8 @@ def shape_detection(image):
 	# find contours in the thresholded image
 	cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 	cnts = imutils.grab_contours(cnts)
+	allCenterx = []
+	allCentery = []
 
 	# loop over the contours
 	for c in cnts:
@@ -83,7 +120,29 @@ def shape_detection(image):
 
 		# Paint the center of the bounding rectangle
 		cv2.circle(image, (x + int(w/2), y + int(h/2)), 1, (255, 0, 0), 2)
+		allCenterx.append(x + int(w/2))
+		allCentery.append(y + int(h/2))
 	
 		# show the output image
 		cv2.imshow("Image", image)
 		cv2.waitKey(0)
+
+	# estimating coefficients 
+	b = estimate_coef(np.asarray(allCentery), np.asarray(allCenterx))
+	b2=estimate_coef(np.asarray(allCenterx), np.asarray(allCentery))
+
+	# calculate axes intersection points
+	a1x = np.float32(-b[0]/b[1])
+	a1y = 0
+	a2x = 0
+	a2y = np.float32(b[0])
+
+	# plotting regression line 
+	lineThickness = 2
+	print(a1x, a1y, a2x, a2y)
+	cv2.line(image, (a1x, a1y), (a2x, a2y), (200,0,0), lineThickness)
+
+	# show the output image
+	cv2.imshow("ImageLinearRegression", image)
+	cv2.waitKey(0)
+	#plot_regression_line(np.asarray(allCenterx), np.asarray(allCentery), b2) 
