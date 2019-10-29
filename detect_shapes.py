@@ -109,9 +109,6 @@ def shape_detection(image):
 		box = cv2.boxPoints(rect)
 		box = np.int0(box)
 
-		# Draw the smallest bounding rectangle for now
-		cv2.drawContours(image, [box], -1, (0, 255, 0), 2)
-
 		# Detect the bounding rectangle of the contour
 		# x and y are the coordinates of the top left vertice
 		# w and h are the width and height, respectively
@@ -119,16 +116,22 @@ def shape_detection(image):
 		# print((x, y, w, h))
 
 		# Paint the center of the bounding rectangle
-		cv2.circle(image, (x + int(w/2), y + int(h/2)), 1, (255, 0, 0), 2)
-		allCenterx.append(x + int(w/2))
-		allCentery.append(y + int(h/2))
+		print(w,h)
+		if h/w >= 10 and h/w <= 50:
+			print("detetou...")
+			allCenterx.append(x + int(w/2))
+			allCentery.append(y + int(h/2))
+			cv2.circle(image, (x + int(w/2), y + int(h/2)), 1, (255, 0, 0), 2)
+			# Draw the smallest bounding rectangle for now
+			cv2.drawContours(image, [box], -1, (0, 255, 0), 1)
+
 	
 		# show the output image
 		cv2.imshow("Image", image)
 		cv2.waitKey(0)
 
 	# estimating coefficients 
-	b = estimate_coef(np.asarray(allCentery), np.asarray(allCenterx))
+	b = estimate_coef(np.asarray(allCenterx), np.asarray(allCentery))
 	b2=estimate_coef(np.asarray(allCenterx), np.asarray(allCentery))
 
 	# calculate axes intersection points
@@ -137,12 +140,17 @@ def shape_detection(image):
 	a2x = 0
 	a2y = np.float32(b[0])
 
+	 # predicted response vector 
+    # y_pred = b[0] + b[1]*x
+
+	y= b[0] + b[1]*146
+
 	# plotting regression line 
 	lineThickness = 2
 	print(a1x, a1y, a2x, a2y)
-	cv2.line(image, (a1x, a1y), (a2x, a2y), (200,0,0), lineThickness)
+	cv2.line(image, (a2x, a2y), (146,int(y)), (200,0,0), lineThickness)
 
 	# show the output image
 	cv2.imshow("ImageLinearRegression", image)
 	cv2.waitKey(0)
-	#plot_regression_line(np.asarray(allCenterx), np.asarray(allCentery), b2) 
+	plot_regression_line(np.asarray(allCenterx), np.asarray(allCentery), b2) 

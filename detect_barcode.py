@@ -83,6 +83,7 @@ def crop(img, box):
 	y2 = box[3][1]
 		
 	cropped = img[y1:y2, x1:x2]
+	print(cropped.shape)
 	cv2.imshow("cropped", cropped)
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
