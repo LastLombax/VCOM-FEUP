@@ -70,18 +70,12 @@ def findCountors(closed):
 	cnts = imutils.grab_contours(cnts)
 	c = sorted(cnts, key = cv2.contourArea, reverse = True)[0]
 	# compute the rotated bounding box of the largest contour
-	rect = cv2.minAreaRect(c)
-	box = cv2.cv.BoxPoints(rect) if imutils.is_cv2() else cv2.boxPoints(rect)
-	box = np.int0(box)
-	return box
+	x, y, w, h = cv2.boundingRect(c)
+
+	return x, y, x+w, y+h
 
 # Crops ROI of image
-def crop(img, box):
-	x1 = box[1][0]
-	y1 = box[1][1]
-	x2 = box[3][0]
-	y2 = box[3][1]
-		
+def crop(img, x1, y1, x2, y2):
 	cropped = img[y1:y2, x1:x2]
 	print(cropped.shape)
 	cv2.imshow("cropped", cropped)
@@ -95,8 +89,8 @@ def Main():
 
 	(closed, concatImages) = MainAlgorithm(gray)
 	showProgressInWindow(concatImages)
-	box = findCountors(closed)
-	cropped = crop(image, box)
+	x1, y1, x2, y2 = findCountors(closed)
+	cropped = crop(image, x1, y1, x2, y2)
 
 	inverted_image = cv2.bitwise_not(cropped)
 	cv2.imshow("inverted", inverted_image)

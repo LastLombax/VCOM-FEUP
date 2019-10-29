@@ -2,29 +2,21 @@
 import imutils
 import cv2
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 
 # WIP: This isn't as straightforward as it seemed to be
-def findMidValue(hsvImage):
-	
-	rows, cols, chan = hsvImage.shape
-	values = []
-	
-	for i in range(rows):
-		for j in range(cols):
-			values.append(hsvImage[i,j,2])
-	values.sort()
+def otsuThresh(gray):
 
-	# print(hsvImage)
+	# Experimentar adaptive threshold, ou aumentar contraste em vez de gaussian
+	blur = cv2.GaussianBlur(gray, (5,5), 0)
+	thresh, otsu = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-	maxDiff = 0
-	maxDiffIdx = 0
-	for i in range(len(values) - 1):
-		if values[i + 1] - values[i] > maxDiff:
-			maxDiff = values[i + 1] - values[i]
-			maxDiffIdx = i
+	print(thresh)
+	cv2.imshow("Otsu", otsu)
+	cv2.waitKey(0)
 
-	return values[maxDiffIdx] + int(maxDiff / 2)
+	return int(thresh)
 
 def estimate_coef(x, y): 
     # number of observations/points 
@@ -65,10 +57,15 @@ def shape_detection(image):
 	
 	# Convert to HSV colourspace
 	hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+	# Convert to grayscale	
+	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+	thresh = otsuThresh(gray)
 	
 	# Define the limits of the "black" colour <------ TODO: Definir Value de acordo com a imagem em vez de hard-coded (if possible)
 	black_lo = np.array([0, 0, 0])
-	black_hi = np.array([360, 255, 128])
+	black_hi = np.array([360, 255, thresh])
 
 	# Create mask to select "blacks"
 	mask = cv2.inRange(hsv, black_lo, black_hi)
@@ -115,16 +112,26 @@ def shape_detection(image):
 		(x, y, w, h) = cv2.boundingRect(c)
 		# print((x, y, w, h))
 
-		# Paint the center of the bounding rectangle
-		print(w,h)
-		if h/w >= 10 and h/w <= 50:
+		# Draw countours
+		# print(w,h)
+		# print(box)
+
+		dist1 = math.sqrt((box[0,0] - box[1,0])**2 + (box[0,1] - box[1,1])**2)
+		dist2 = math.sqrt((box[1,0] - box[2,0])**2 + (box[1,1] - box[2,1])**2)
+
+		if (dist1 == 0 or dist2 == 0):
+			continue
+
+		print(dist1/dist2, dist2/dist1)
+		
+		# Draw the smallest bounding rectangle for now
+		cv2.drawContours(image, [box], -1, (0, 255, 0), 1)
+		if (dist1/dist2 >= 10 and dist1/dist2 <= 50) or (dist2/dist1 >= 10 and dist2/dist1 <= 50):
 			print("detetou...")
 			allCenterx.append(x + int(w/2))
 			allCentery.append(y + int(h/2))
+			# Paint the center of the bounding rectangle
 			cv2.circle(image, (x + int(w/2), y + int(h/2)), 1, (255, 0, 0), 2)
-			# Draw the smallest bounding rectangle for now
-			cv2.drawContours(image, [box], -1, (0, 255, 0), 1)
-
 	
 		# show the output image
 		cv2.imshow("Image", image)
