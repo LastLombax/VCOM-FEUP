@@ -6,17 +6,23 @@ import math
 import matplotlib.pyplot as plt
 
 # WIP: This isn't as straightforward as it seemed to be
-def otsuThresh(gray):
+def findThresh(gray):
 
 	# Experimentar adaptive threshold, ou aumentar contraste em vez de gaussian
-	blur = cv2.GaussianBlur(gray, (5,5), 0)
-	thresh, otsu = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-
+	
+	hi_contrast = np.zeros(gray.shape, gray.dtype)
+	for line in range(gray.shape[0]):
+		for col in range(gray.shape[1]):
+			hi_contrast[line, col] = np.clip(1.0 * gray[line, col], 0, 255)
+	thresh, otsu = cv2.threshold(hi_contrast, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 	print(thresh)
 	cv2.imshow("Otsu", otsu)
 	cv2.waitKey(0)
-
 	return int(thresh)
+	# return otsu
+
+	# binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 0)
+	# cv2.imshow("Adaptive", binary)
 
 def estimate_coef(x, y): 
     # number of observations/points 
@@ -61,7 +67,7 @@ def shape_detection(image):
 	# Convert to grayscale	
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-	thresh = otsuThresh(gray)
+	thresh = findThresh(gray)
 	
 	# Define the limits of the "black" colour <------ TODO: Definir Value de acordo com a imagem em vez de hard-coded (if possible)
 	black_lo = np.array([0, 0, 0])
@@ -124,14 +130,14 @@ def shape_detection(image):
 
 		print(dist1/dist2, dist2/dist1)
 		
-		# Draw the smallest bounding rectangle for now
-		cv2.drawContours(image, [box], -1, (0, 255, 0), 1)
-		if (dist1/dist2 >= 10 and dist1/dist2 <= 50) or (dist2/dist1 >= 10 and dist2/dist1 <= 50):
+		if (dist1/dist2 >= 8) or (dist2/dist1 >= 8):
 			print("detetou...")
 			allCenterx.append(x + int(w/2))
 			allCentery.append(y + int(h/2))
 			# Paint the center of the bounding rectangle
 			cv2.circle(image, (x + int(w/2), y + int(h/2)), 1, (255, 0, 0), 2)
+			# Draw the smallest bounding rectangle for now
+			cv2.drawContours(image, [box], -1, (0, 255, 0), 1)
 	
 		# show the output image
 		cv2.imshow("Image", image)
@@ -155,9 +161,9 @@ def shape_detection(image):
 	# plotting regression line 
 	lineThickness = 2
 	print(a1x, a1y, a2x, a2y)
-	cv2.line(image, (a2x, a2y), (146,int(y)), (200,0,0), lineThickness)
+	# cv2.line(image, (a2x, a2y), (146,int(y)), (200,0,0), lineThickness)
 
 	# show the output image
 	cv2.imshow("ImageLinearRegression", image)
 	cv2.waitKey(0)
-	plot_regression_line(np.asarray(allCenterx), np.asarray(allCentery), b2) 
+	# plot_regression_line(np.asarray(allCenterx), np.asarray(allCentery), b2) 
