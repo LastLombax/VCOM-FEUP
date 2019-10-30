@@ -6,6 +6,7 @@ import numpy as np
 import argparse
 import imutils
 import cv2
+import math
 import detect_shapes
 
 # Parses argument and returns image and image in grayscale
@@ -79,15 +80,49 @@ def findCountors(closed):
 		print(extent)
 		if extent > 0.6:
 			break
+
 	# VER 9, 16, 18(mais ou menos), 19, 20, 21, 25
 	# compute the rotated bounding box of the largest contour
 	x, y, w, h = cv2.boundingRect(c)
+	rect = cv2.minAreaRect(c)
+	box = cv2.cv.BoxPoints(rect) if imutils.is_cv2() else cv2.boxPoints(rect)
+	box = np.int0(box)
+	return box, x, y, w, h
 
-	return x, y, x+w, y+h
+# Returns the rotated rectangle's angle in relation to the X axis
+def getRotationAngle(box):
+	dist1 = math.sqrt((box[0,0] - box[1,0])**2 + (box[0,1] - box[1,1])**2)
+	dist2 = math.sqrt((box[1,0] - box[2,0])**2 + (box[1,1] - box[2,1])**2)
+
+	angle = 0
+	if (dist1 > dist2):
+		angle = -math.acos( (box[0,0] - box[1,0]) / dist1)
+	else:
+		angle = math.asin( (box[0,0] - box[1,0]) / dist1)
+	return angle * 180 / math.pi
 
 # Crops ROI of image
-def crop(img, x1, y1, x2, y2):
-	cropped = img[y1:y2, x1:x2]
+def crop(img, box, rectx, recty, w, h):
+
+	print(box)
+
+	cropped = np.zeros(img.shape, img.dtype)
+	for y in range(img.shape[0]):
+		for x in range(img.shape[1]):
+			if (cv2.pointPolygonTest(box, (x,y), False) >= 0):
+				cropped[y,x] = img[y,x]
+
+	cv2.imshow("Croped image", cropped)
+	cv2.waitKey(0)
+
+	angle = getRotationAngle(box)
+	cropped = imutils.rotate_bound(cropped,angle)
+
+	cv2.imshow("Rotated image", cropped)
+	cv2.waitKey(0)	
+
+	cropped = cropped[recty:recty + h, rectx:rectx + w]
+
 	print(cropped.shape)
 	cv2.imshow("cropped", cropped)
 	cv2.waitKey(0)
@@ -100,8 +135,8 @@ def Main():
 
 	(closed, concatImages) = MainAlgorithm(gray)
 	showProgressInWindow(concatImages)
-	x1, y1, x2, y2 = findCountors(closed)
-	cropped = crop(image, x1, y1, x2, y2)
+	box, rectx, recty, w, h  = findCountors(closed)
+	cropped = crop(image, box, rectx, recty, w, h)
 
 	inverted_image = cv2.bitwise_not(cropped)
 	cv2.imshow("inverted", inverted_image)
