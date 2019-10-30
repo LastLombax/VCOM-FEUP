@@ -37,14 +37,14 @@ def MainAlgorithm(gray):
 	(_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
 
 	# construct a closing kernel and apply it to the thresholded image
-	kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 7)) 
+	kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (40, 7)) 
 	aux = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
 	concat1 = np.hstack((blurred, aux))
 
 	# perform a series of erosions and dilations
-	closed = cv2.erode(aux, None, iterations = 4)
-	closed = cv2.dilate(closed, None, iterations = 4)
+	closed = cv2.erode(aux, None, iterations = 6)
+	closed = cv2.dilate(closed, None, iterations = 6)
 
 	concat2 = np.hstack((concat1, closed))
 	return closed, concat2
@@ -68,7 +68,18 @@ def findCountors(closed):
 	cnts = cv2.findContours(closed.copy(), cv2.RETR_EXTERNAL,
 		cv2.CHAIN_APPROX_SIMPLE)
 	cnts = imutils.grab_contours(cnts)
-	c = sorted(cnts, key = cv2.contourArea, reverse = True)[0]
+	cnts = sorted(cnts, key = cv2.contourArea, reverse = True)
+	
+	print("Extents")
+	for c in cnts:		
+		area = cv2.contourArea(c)
+		x,y,w,h = cv2.boundingRect(c)
+		rect_area = w*h
+		extent = float(area)/rect_area
+		print(extent)
+		if extent > 0.6:
+			break
+	# VER 9, 16, 18(mais ou menos), 19, 20, 21, 25
 	# compute the rotated bounding box of the largest contour
 	x, y, w, h = cv2.boundingRect(c)
 
