@@ -145,7 +145,7 @@ def getRotationAngle(box):
 		angle = -math.acos( (box[0,0] - box[1,0]) / dist1)
 	else:
 		angle = math.asin( (box[0,0] - box[1,0]) / dist1)
-	return angle * 180 / math.pi
+	return angle * 180 / math.pi, dist1, dist2
 
 # Crops ROI of image
 def crop(img, box, rectx, recty, w, h):
@@ -159,13 +159,30 @@ def crop(img, box, rectx, recty, w, h):
 	cv2.imshow("Cropped image", cropped)
 	cv2.waitKey(0)
 
-	angle = getRotationAngle(box)
+	angle, dist0_1, dist1_2 = getRotationAngle(box)
 	cropped = imutils.rotate_bound(cropped,angle)
 
 	cv2.imshow("Rotated image", cropped)
 	cv2.waitKey(0)
 
-	cv2.imshow("cropped", cropped)
+	if dist0_1 > dist1_2:
+		if angle > -45:
+			extra_y = abs(box[0,1] - box[1,1])
+			extra_x = abs(box[0,0] - box[3,0])
+		else:
+			extra_y = abs(box[0,0] - box[1,0])
+			extra_x = abs(box[0,1] - box[3,1])
+		cropped = cropped[extra_y:extra_y + int(dist1_2), extra_x:extra_x + int(dist0_1)]
+	else:
+		if angle < 45:
+			extra_y = abs(box[0,1] - box[3,1])
+			extra_x = abs(box[0,0] - box[1,0])
+		else:
+			extra_y = abs(box[0,0] - box[3,0])
+			extra_x = abs(box[0,1] - box[1,1])
+		cropped = cropped[extra_y:extra_y + int(dist0_1), extra_x:extra_x + int(dist1_2)]
+
+	cv2.imshow("Final crop", cropped)
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 	return cropped
