@@ -8,6 +8,30 @@ import imutils
 import cv2
 import math
 import detect_shapes
+from PIL import Image, ImageStat
+
+def detect_color_image(file, thumb_size=40, MSE_cutoff=22, adjust_color_bias=True):
+	thresh = 225
+	pil_img = Image.open(file)
+	bands = pil_img.getbands()
+	if bands == ('R','G','B') or bands== ('R','G','B','A'):
+		thumb = pil_img.resize((thumb_size,thumb_size))
+		SSE, bias = 0, [0,0,0]
+		if adjust_color_bias:
+			bias = ImageStat.Stat(thumb).mean[:3]
+			bias = [b - sum(bias)/3 for b in bias ]
+		for pixel in thumb.getdata():
+			mu = sum(pixel)/3
+			SSE += sum((pixel[i] - mu - bias[i])*(pixel[i] - mu - bias[i]) for i in [0,1,2])
+		MSE = float(SSE)/(thumb_size*thumb_size)
+		if MSE <= MSE_cutoff:
+			thresh = 50
+	elif len(bands) == 1:
+		thresh = 50
+
+	return thresh
+
+			
 
 # Parses argument and returns image and image in grayscale
 def loadImage():	
@@ -15,14 +39,15 @@ def loadImage():
 	ap.add_argument("-i", "--image", required = True,
 		help = "path to the image file")
 	args = vars(ap.parse_args())
+	thresh = detect_color_image(args["image"])
 
 	# load the image and convert it to grayscale
 	image = cv2.imread(args["image"])
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-	return image, gray
+	return image, gray, thresh
 
 
-def MainAlgorithm(gray):
+def MainAlgorithm(gray, calc_thresh):
 	# compute the Scharr gradient magnitude representation of the images
 	# in both the x and y direction using OpenCV 2.4
 	ddepth = cv2.CV_32F
@@ -35,7 +60,7 @@ def MainAlgorithm(gray):
 
 	# blur and threshold the image
 	blurred = cv2.blur(gradient, (9,9)) 	
-	(_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
+	(_, thresh) = cv2.threshold(blurred, calc_thresh, 255, cv2.THRESH_BINARY)
 
 	# construct a closing kernel and apply it to the thresholded image
 	kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (40, 7)) 
@@ -131,9 +156,9 @@ def crop(img, box, rectx, recty, w, h):
 
 
 def Main():
-	(image, gray) = loadImage()
+	(image, gray, thresh) = loadImage()
 
-	(closed, concatImages) = MainAlgorithm(gray)
+	(closed, concatImages) = MainAlgorithm(gray, thresh)
 	showProgressInWindow(concatImages)
 	box, rectx, recty, w, h  = findCountors(closed)
 	cropped = crop(image, box, rectx, recty, w, h)
