@@ -88,6 +88,26 @@ def showProgressInWindow(image):
 	cv2.imshow('Progress', image)
 	cv2.waitKey(0)
 
+# Expands the box by 5% from it's center
+def expandBox(box):
+	
+	expansion_rate = 0.03
+
+	box[0,0] = box[0,0] + (box[0,0] - box[2,0]) * expansion_rate
+	box[0,1] = box[0,1] + (box[0,1] - box[2,1]) * expansion_rate
+	
+	box[1,0] = box[1,0] + (box[1,0] - box[3,0]) * expansion_rate
+	box[1,1] = box[1,1] + (box[1,1] - box[3,1]) * expansion_rate
+	
+	box[2,0] = box[2,0] + (box[2,0] - box[0,0]) * expansion_rate
+	box[2,1] = box[2,1] + (box[2,1] - box[0,1]) * expansion_rate
+	
+	box[3,0] = box[3,0] + (box[3,0] - box[1,0]) * expansion_rate
+	box[3,1] = box[3,1] + (box[3,1] - box[1,1]) * expansion_rate
+
+
+	return box
+
 # find the contours in the thresholded image, then sort the contours
 # by their area, keeping only the largest one
 def findCountors(closed):
@@ -111,6 +131,7 @@ def findCountors(closed):
 	rect = cv2.minAreaRect(c)
 	box = cv2.cv.BoxPoints(rect) if imutils.is_cv2() else cv2.boxPoints(rect)
 	box = np.int0(box)
+	box = expandBox(box)
 	x, y, w, h = cv2.boundingRect(box)
 	return box, x, y, w, h
 
@@ -128,7 +149,7 @@ def getRotationAngle(box):
 
 # Crops ROI of image
 def crop(img, box, rectx, recty, w, h):
-	
+
 	cropped = np.zeros((h, w, img.shape[2]), img.dtype)
 	for y in range(img.shape[0]):
 		for x in range(img.shape[1]):
