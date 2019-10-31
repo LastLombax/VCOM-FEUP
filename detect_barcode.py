@@ -108,10 +108,10 @@ def findCountors(closed):
 
 	# VER 9, 16, 18(mais ou menos), 19, 20, 21, 25
 	# compute the rotated bounding box of the largest contour
-	x, y, w, h = cv2.boundingRect(c)
 	rect = cv2.minAreaRect(c)
 	box = cv2.cv.BoxPoints(rect) if imutils.is_cv2() else cv2.boxPoints(rect)
 	box = np.int0(box)
+	x, y, w, h = cv2.boundingRect(box)
 	return box, x, y, w, h
 
 # Returns the rotated rectangle's angle in relation to the X axis
@@ -128,27 +128,22 @@ def getRotationAngle(box):
 
 # Crops ROI of image
 def crop(img, box, rectx, recty, w, h):
-
-	print(box)
-
-	cropped = np.zeros(img.shape, img.dtype)
+	
+	cropped = np.zeros((h, w, img.shape[2]), img.dtype)
 	for y in range(img.shape[0]):
 		for x in range(img.shape[1]):
 			if (cv2.pointPolygonTest(box, (x,y), False) >= 0):
-				cropped[y,x] = img[y,x]
+				cropped[y - recty, x - rectx] = img[y,x]
 
-	cv2.imshow("Croped image", cropped)
+	cv2.imshow("Cropped image", cropped)
 	cv2.waitKey(0)
 
 	angle = getRotationAngle(box)
 	cropped = imutils.rotate_bound(cropped,angle)
 
 	cv2.imshow("Rotated image", cropped)
-	cv2.waitKey(0)	
+	cv2.waitKey(0)
 
-	cropped = cropped[recty:recty + h, rectx:rectx + w]
-
-	print(cropped.shape)
 	cv2.imshow("cropped", cropped)
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
@@ -161,6 +156,7 @@ def Main():
 	(closed, concatImages) = MainAlgorithm(gray, thresh)
 	showProgressInWindow(concatImages)
 	box, rectx, recty, w, h  = findCountors(closed)
+
 	cropped = crop(image, box, rectx, recty, w, h)
 
 	inverted_image = cv2.bitwise_not(cropped)
