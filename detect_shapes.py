@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+from PIL import Image, ImageStat
 
 # WIP: This isn't as straightforward as it seemed to be
 def findThresh(gray):
@@ -59,13 +60,13 @@ def plot_regression_line(x, y, b):
     plt.show() 
 
 
-def shape_detection(image):
+def shape_detection(inverted_image):
 	
 	# Convert to HSV colourspace
-	hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+	hsv = cv2.cvtColor(inverted_image, cv2.COLOR_BGR2HSV)
 
 	# Convert to grayscale	
-	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+	gray = cv2.cvtColor(inverted_image, cv2.COLOR_BGR2GRAY)
 
 	thresh = findThresh(gray)
 	
@@ -77,30 +78,49 @@ def shape_detection(image):
 	mask = cv2.inRange(hsv, black_lo, black_hi)
 
 	# Change "blacks" to pure black and "whites" to pure white
-	image[mask > 0] = (0, 0, 0)
-	image[mask <= 0] = (255, 255, 255)
+	inverted_image[mask > 0] = (0, 0, 0)
+	inverted_image[mask <= 0] = (255, 255, 255)
 
 	# Resize de image to a decent size
-	resized = imutils.resize(image, width=1000)
-	ratio = image.shape[0] / float(resized.shape[0])
+	resized = imutils.resize(inverted_image, width=1000)
+	ratio = inverted_image.shape[0] / float(resized.shape[0])
 	
-	# convert the resized image to grayscale, blur it slightly,
+	# convert the resized inverted_image to grayscale, blur it slightly,
 	# and threshold it
 	gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
 	blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 	thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY)[1]
 	
-	# find contours in the thresholded image
+	# find contours in the thresholded inverted_image
 	cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 	cnts = imutils.grab_contours(cnts)
 	allCenterx = []
 	allCentery = []
 
+	#Set Pixel Colors according Black and White regions
+	imageWidth = inverted_image.shape[1] #Get image width
+	imageHeight = inverted_image.shape[0] #Get image height
+
+	yPos = int(imageHeight/2)
+	xPos = 0
+
+	pixelsColorLine = []
+
+	while xPos < imageWidth: #Loop through collumns
+		if set(inverted_image[yPos, xPos]) == set([255,255,255]):
+			pixelsColorLine.append([0, 0, 255])
+		else:
+			pixelsColorLine.append([255, 153, 51])
+
+		xPos = xPos + 1 #Increment X position by 1
+
+	xPos = 0
+
 	# loop over the contours
 	for c in cnts:
 	
 		# multiply the contour (x, y)-coordinates by the resize ratio,
-		# then draw the contours on the image
+		# then draw the contours on the inverted_image
 		c = c.astype("float")
 		c *= ratio
 		c = c.astype("int")
@@ -135,35 +155,12 @@ def shape_detection(image):
 			allCenterx.append(x + int(w/2))
 			allCentery.append(y + int(h/2))
 			# Paint the center of the bounding rectangle
-			cv2.circle(image, (x + int(w/2), y + int(h/2)), 1, (255, 0, 0), 2)
+			cv2.circle(inverted_image, (x + int(w/2), y + int(h/2)), 1, (255, 0, 0), 2)
 			# Draw the smallest bounding rectangle for now
-			cv2.drawContours(image, [box], -1, (0, 255, 0), 1)
+			cv2.drawContours(inverted_image, [box], -1, (0, 255, 0), 1)
 	
-		# show the output image
-		cv2.imshow("Image", image)
-		cv2.waitKey(0)
-
-	# estimating coefficients 
-	b = estimate_coef(np.asarray(allCenterx), np.asarray(allCentery))
-	b2=estimate_coef(np.asarray(allCenterx), np.asarray(allCentery))
-
-	# calculate axes intersection points
-	a1x = np.float32(-b[0]/b[1])
-	a1y = 0
-	a2x = 0
-	a2y = np.float32(b[0])
-
-	 # predicted response vector 
-    # y_pred = b[0] + b[1]*x
-
-	y= b[0] + b[1]*146
-
-	# plotting regression line 
-	lineThickness = 2
-	print(a1x, a1y, a2x, a2y)
-	# cv2.line(image, (a2x, a2y), (146,int(y)), (200,0,0), lineThickness)
-
-	# show the output image
-	cv2.imshow("ImageLinearRegression", image)
+	# show the output inverted_image
+	cv2.imshow("Image Inverted (Black & White)", inverted_image)
 	cv2.waitKey(0)
-	# plot_regression_line(np.asarray(allCenterx), np.asarray(allCentery), b2) 
+
+	return pixelsColorLine

@@ -202,8 +202,42 @@ def Main():
 	cv2.waitKey(0)
 	
 
-	detect_shapes.shape_detection(inverted_image)
+	pixelsColorLine = detect_shapes.shape_detection(inverted_image)
 
+	imageWidth = inverted_image.shape[1] #Get image width
+	imageHeight = inverted_image.shape[0] #Get image height
+
+	yPos = int(imageHeight/2)
+	xPos = 0
+
+	barCount = 0
+
+	while xPos < imageWidth: #Loop through collumns
+
+		if set(pixelsColorLine[xPos]) == set([0, 0, 255]):
+			if xPos > 0:
+				if set(pixelsColorLine[xPos-1]) == set([255, 153, 51]):
+					barCount = barCount + 1
+
+		print(barCount)
+
+		if barCount >= 1 and barCount < 30:
+			cropped.itemset((yPos, xPos, 0), pixelsColorLine[xPos][0]) #Set B 
+			cropped.itemset((yPos, xPos, 1), pixelsColorLine[xPos][1]) #Set G 
+			cropped.itemset((yPos, xPos, 2), pixelsColorLine[xPos][2]) #Set R
+
+		if barCount == 30:
+			if set(pixelsColorLine[xPos]) == set([0, 0, 255]):
+				cropped.itemset((yPos, xPos, 0), pixelsColorLine[xPos][0]) #Set B 
+				cropped.itemset((yPos, xPos, 1), pixelsColorLine[xPos][1]) #Set G 
+				cropped.itemset((yPos, xPos, 2), pixelsColorLine[xPos][2]) #Set R
+
+		xPos = xPos + 1 #Increment X position by 1
+
+	xPos = 0
+
+	cv2.imshow("Final cropped with Line", cropped)
+	cv2.waitKey(0)
 
 	# draw a bounding box arounded the detected barcode and display the image
 	cv2.drawContours(image, [box], -1, (0, 255, 0), 1)
