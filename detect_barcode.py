@@ -211,22 +211,29 @@ def Main():
 	xPos = 0
 
 	barCount = 0
+	blackCount = 0
 
 	while xPos < imageWidth: #Loop through collumns
 
-		if set(pixelsColorLine[xPos]) == set([0, 0, 255]):
+		if set(pixelsColorLine[xPos]) == set([255, 153, 51]):
 			if xPos > 0:
-				if set(pixelsColorLine[xPos-1]) == set([255, 153, 51]):
+				if set(pixelsColorLine[xPos-1]) == set([0, 0, 255]):
 					barCount = barCount + 1
+					cv2.imshow("Building Line", cropped)
+					print("Black Bar detected. NR: ", barCount)
+					print("Number of pixels: ", blackCount)
+					blackCount = 0
+					cv2.waitKey(0)
 
-		print(barCount)
+		if set(pixelsColorLine[xPos]) == set([0, 0, 255]):
+			blackCount = blackCount + 1
 
 		if barCount >= 1 and barCount < 30:
 			cropped.itemset((yPos, xPos, 0), pixelsColorLine[xPos][0]) #Set B 
 			cropped.itemset((yPos, xPos, 1), pixelsColorLine[xPos][1]) #Set G 
 			cropped.itemset((yPos, xPos, 2), pixelsColorLine[xPos][2]) #Set R
 
-		if barCount == 30:
+		if barCount == 30 or barCount == 0:
 			if set(pixelsColorLine[xPos]) == set([0, 0, 255]):
 				cropped.itemset((yPos, xPos, 0), pixelsColorLine[xPos][0]) #Set B 
 				cropped.itemset((yPos, xPos, 1), pixelsColorLine[xPos][1]) #Set G 
