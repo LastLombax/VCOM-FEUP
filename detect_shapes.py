@@ -151,7 +151,6 @@ def shape_detection(inverted_image):
 		print(dist1/dist2, dist2/dist1)
 		
 		if (dist1/dist2 >= 8) or (dist2/dist1 >= 8):
-			print("detetou...")
 			allCenterx.append(x + int(w/2))
 			allCentery.append(y + int(h/2))
 			# Paint the center of the bounding rectangle

@@ -213,6 +213,9 @@ def Main():
 	barCount = 0
 	blackCount = 0
 
+	print("\n")
+	print("--- Image: ", imageWidth, "px :", imageHeight,"px --- \n")
+
 	while xPos < imageWidth: #Loop through collumns
 
 		if set(pixelsColorLine[xPos]) == set([255, 153, 51]):
@@ -221,7 +224,8 @@ def Main():
 					barCount = barCount + 1
 					cv2.imshow("Building Line", cropped)
 					print("Black Bar detected. NR: ", barCount)
-					print("Number of pixels: ", blackCount)
+					print("Number of Pixels: ", blackCount)
+					print("Percentage of pixels:", str(round(blackCount/imageWidth, 3)), "% \n")
 					blackCount = 0
 					cv2.waitKey(0)
 
