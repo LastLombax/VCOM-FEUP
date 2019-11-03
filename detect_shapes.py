@@ -104,13 +104,22 @@ def shape_detection(inverted_image):
 	yPos = int(imageHeight/2)
 	xPos = 0
 
+	barCount = 0
+	foundFirstBlack = False
+	offSet = 0
+
 	pixelsColorLine = []
 
-	while xPos < imageWidth: #Loop through collumns
+	while xPos < imageWidth and barCount < 30: #Loop through collumns
 		if set(inverted_image[yPos, xPos]) == set([255,255,255]):
+			if not foundFirstBlack:
+				foundFirstBlack = True
+				offSet = xPos
 			pixelsColorLine.append([0, 0, 255])
-		else:
+		elif foundFirstBlack:
 			pixelsColorLine.append([255, 153, 51])
+			if set(inverted_image[yPos, xPos - 1]) == set([255,255,255]):
+				barCount = barCount + 1
 
 		xPos = xPos + 1 #Increment X position by 1
 
@@ -162,4 +171,4 @@ def shape_detection(inverted_image):
 	cv2.imshow("Image Inverted (Black & White)", inverted_image)
 	cv2.waitKey(0)
 
-	return pixelsColorLine
+	return pixelsColorLine, offSet
