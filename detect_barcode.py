@@ -212,6 +212,9 @@ def Main():
 
 	barCount = 0
 	blackCount = 0
+	whiteCount = 0
+
+	percSum = 0
 
 	print("\n")
 	print("--- Image: ", imageWidth, "px :", imageHeight,"px --- \n")
@@ -219,18 +222,27 @@ def Main():
 	while xPos < imageWidth: #Loop through collumns
 
 		if set(pixelsColorLine[xPos]) == set([255, 153, 51]):
+			whiteCount = whiteCount + 1
 			if xPos > 0:
 				if set(pixelsColorLine[xPos-1]) == set([0, 0, 255]):
 					barCount = barCount + 1
 					cv2.imshow("Building Line", cropped)
 					print("Black Bar detected. NR: ", barCount)
 					print("Number of Pixels: ", blackCount)
-					print("Percentage of pixels:", str(round(blackCount/imageWidth, 3)), "% \n")
+					print("Percentage of pixels:", str(round(blackCount/imageWidth, 3) * 100), "% \n")
+					percSum = percSum + round(blackCount/imageWidth, 3)
 					blackCount = 0
 					cv2.waitKey(0)
 
 		if set(pixelsColorLine[xPos]) == set([0, 0, 255]):
 			blackCount = blackCount + 1
+			if xPos > 0:
+				if set(pixelsColorLine[xPos-1]) == set([255, 153, 51]): # Está a imprimir a barra branca antes de encontrar a primeira preta
+					print("White Bar detected.")						# e não tenho a certeza se é bem isso que se quer
+					print("Number of Pixels: ", whiteCount)
+					print("Percentage of pixels:", str(round(whiteCount/imageWidth, 3) * 100), "% \n")
+					percSum = percSum + round(whiteCount/imageWidth, 3)
+					whiteCount = 0
 
 		if barCount >= 1 and barCount < 30:
 			cropped.itemset((yPos, xPos, 0), pixelsColorLine[xPos][0]) #Set B 
@@ -246,6 +258,9 @@ def Main():
 		xPos = xPos + 1 #Increment X position by 1
 
 	xPos = 0
+
+	print("Total percentage =", str(percSum * 100), "%")
+	print("(It is likely to have accumulated aproximation errors)\n")
 
 	cv2.imshow("Final cropped with Line", cropped)
 	cv2.waitKey(0)
