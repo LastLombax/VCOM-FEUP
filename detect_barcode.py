@@ -10,6 +10,7 @@ import math
 import detect_shapes
 from PIL import Image, ImageStat
 
+# Detects if image is black and white or not
 def detect_color_image(file, thumb_size=40, MSE_cutoff=22, adjust_color_bias=True):
 	thresh = 225
 	pil_img = Image.open(file)
@@ -108,26 +109,21 @@ def expandBox(box):
 
 	return box
 
-# find the contours in the thresholded image, then sort the contours
-# by their area, keeping only the largest one
+# find the contours in the thresholded image
 def findCountors(closed):
 	cnts = cv2.findContours(closed.copy(), cv2.RETR_EXTERNAL,
 		cv2.CHAIN_APPROX_SIMPLE)
 	cnts = imutils.grab_contours(cnts)
 	cnts = sorted(cnts, key = cv2.contourArea, reverse = True)
 	
-	print("Extents")
 	for c in cnts:		
 		area = cv2.contourArea(c)
 		x,y,w,h = cv2.boundingRect(c)
 		rect_area = w*h
 		extent = float(area)/rect_area
-		print(extent)
 		if extent > 0.6:
 			break
 
-	# VER 9, 16, 18(mais ou menos), 19, 20, 21, 25
-	# compute the rotated bounding box of the largest contour
 	rect = cv2.minAreaRect(c)
 	box = cv2.cv.BoxPoints(rect) if imutils.is_cv2() else cv2.boxPoints(rect)
 	box = np.int0(box)
@@ -156,14 +152,8 @@ def crop(img, box, rectx, recty, w, h):
 			if (cv2.pointPolygonTest(box, (x,y), False) >= 0):
 				cropped[y - recty, x - rectx] = img[y,x]
 
-	cv2.imshow("Cropped image", cropped)
-	cv2.waitKey(0)
-
 	angle, dist0_1, dist1_2 = getRotationAngle(box)
 	cropped = imutils.rotate_bound(cropped,angle)
-
-	cv2.imshow("Rotated image", cropped)
-	cv2.waitKey(0)
 
 	if dist0_1 > dist1_2:
 		if angle > -45:
@@ -182,30 +172,13 @@ def crop(img, box, rectx, recty, w, h):
 			extra_x = abs(box[0,1] - box[1,1])
 		cropped = cropped[extra_y:extra_y + int(dist0_1), extra_x:extra_x + int(dist1_2)]
 
-	cv2.imshow("Final crop", cropped)
-	cv2.waitKey(0)
-	cv2.destroyAllWindows()
 	return cropped
 
+# Prints line in image
+def printLineInImage(inverted_image, pixelsColorLine, cropped, offSet):
 
-def Main():
-	(image, gray, thresh) = loadImage()
-
-	(closed, concatImages) = MainAlgorithm(gray, thresh)
-	showProgressInWindow(concatImages)
-	box, rectx, recty, w, h  = findCountors(closed)
-
-	cropped = crop(image, box, rectx, recty, w, h)
-
-	inverted_image = cv2.bitwise_not(cropped)
-	cv2.imshow("inverted", inverted_image)
-	cv2.waitKey(0)
-	
-
-	pixelsColorLine, offSet = detect_shapes.shape_detection(inverted_image)
-
-	imageWidth = inverted_image.shape[1] #Get image width
-	imageHeight = inverted_image.shape[0] #Get image height
+	imageWidth = inverted_image.shape[1] 
+	imageHeight = inverted_image.shape[0] 
 
 	yPos = int(imageHeight/2)
 	xPos = 0
@@ -251,17 +224,36 @@ def Main():
 				cropped.itemset((yPos, xPos + offSet, 1), pixelsColorLine[xPos][1]) #Set G 
 				cropped.itemset((yPos, xPos + offSet, 2), pixelsColorLine[xPos][2]) #Set R
 
-		xPos = xPos + 1 #Increment X position by 1
+		xPos = xPos + 1 
 
 	xPos = 0
+	cv2.destroyAllWindows()	
 
 	cv2.imshow("Final cropped with Line", cropped)
 	cv2.waitKey(0)
 
-	# draw a bounding box arounded the detected barcode and display the image
+
+# Main program execution
+def Main():
+	(image, gray, thresh) = loadImage()
+
+	(closed, concatImages) = MainAlgorithm(gray, thresh)
+	#showProgressInWindow(concatImages) #for debug only
+	box, rectx, recty, w, h  = findCountors(closed)
+
+	cropped = crop(image, box, rectx, recty, w, h)
+
+	
 	cv2.drawContours(image, [box], -1, (0, 255, 0), 1)
 	cv2.imshow("Image", image)
 	cv2.waitKey(0)
 	cv2.destroyWindow("Image")	
+
+	inverted_image = cv2.bitwise_not(cropped)
+
+	pixelsColorLine, offSet = detect_shapes.shape_detection(inverted_image)
+
+	printLineInImage(inverted_image, pixelsColorLine, cropped, offSet)
+
 
 Main()
