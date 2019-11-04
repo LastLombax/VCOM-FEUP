@@ -227,7 +227,7 @@ def Main():
 					cv2.imshow("Building Line", cropped)
 					print("Black Bar detected. NR: ", barCount)
 					print("Number of Pixels: ", blackCount)
-					print("Percentage of pixels:", str(round(blackCount/len(pixelsColorLine), 3) * 100), "% \n")
+					print("Percentage of pixels:", str(round(blackCount * 100.0/len(pixelsColorLine), 3)), "% \n")
 					blackCount = 0
 					cv2.waitKey(0)
 
@@ -237,7 +237,7 @@ def Main():
 				if set(pixelsColorLine[xPos-1]) == set([255, 153, 51]):
 					print("White Bar detected.")
 					print("Number of Pixels: ", whiteCount)
-					print("Percentage of pixels:", str(round(whiteCount/len(pixelsColorLine), 3) * 100), "% \n")
+					print("Percentage of pixels:", str(round(whiteCount * 100.0/len(pixelsColorLine), 3)), "% \n")
 					whiteCount = 0
 
 		if barCount >= 1 and barCount < 30:
