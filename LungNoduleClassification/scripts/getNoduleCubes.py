@@ -66,10 +66,18 @@ for n in nodules:
                                 imx = cv2.normalize(scan_cube[int(scan_cube.shape[0]/2),:,:], imx, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
                                 imy = cv2.normalize(scan_cube[:,int(scan_cube.shape[1]/2),:], imy, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
                                 imz = cv2.normalize(scan_cube[:,:,int(scan_cube.shape[2]/2)], imz, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
-                                imwrite('../Dataset/images/LNDb-{:04d}_finding{}_x.png'.format(lnd, finding, rad), imx)
-                                imwrite('../Dataset/images/LNDb-{:04d}_finding{}_y.png'.format(lnd, finding, rad), imy)
-                                imwrite('../Dataset/images/LNDb-{:04d}_finding{}_z.png'.format(lnd, finding, rad), imz)
+                                imwrite('../Dataset/images/LNDb-{:04d}_finding{}_x.png'.format(lnd, finding), imx)
+                                imwrite('../Dataset/images/LNDb-{:04d}_finding{}_y.png'.format(lnd, finding), imy)
+                                imwrite('../Dataset/images/LNDb-{:04d}_finding{}_z.png'.format(lnd, finding), imz)
                                 imgs.append((lnd, finding))
+
+                                img = np.zeros((80, 80, 3))
+                                img[:,:,0] = imx
+                                img[:,:,1] = imy
+                                img[:,:,2] = imz
+
+                                img = cv2.normalize(img, img, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+                                imwrite('../Dataset/images/merged/LNDb-{:04d}_finding{}.png'.format(lnd, finding), img)
 
                         # Save mask cubes
                         # np.save('mask_cubes/LNDb-{:04d}_finding{}_rad{}.npy'.format(lnd,finding,rad),mask_cube)                
