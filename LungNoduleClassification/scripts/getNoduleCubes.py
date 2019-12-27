@@ -4,11 +4,36 @@ from matplotlib import pyplot as plt
 from utils import readMhd, readCsv, getImgWorldTransfMats, convertToImgCoord, extractCube
 from readNoduleList import nodEqDiam
 from imageio import imwrite
+from itertools import *
+import os
 import cv2
 
 dispFlag = False
 
 imgs = []
+
+# Create Folders
+
+# define the name of the directory to be created
+path1 = "../Dataset/images/GGO"
+path2 = "../Dataset/images/PartSolid"
+path3 = "../Dataset/images/Solid"
+
+# define the access rights
+access_rights = 0o755
+
+try:
+    os.mkdir(path1, access_rights)
+    os.mkdir(path2, access_rights)
+    os.mkdir(path3, access_rights)
+except OSError:
+    print ("Creation of the directory %s failed" % path1)
+    print ("Creation of the directory %s failed" % path2)
+    print ("Creation of the directory %s failed" % path3)
+else:
+    print ("Successfully created the directory %s" % path1)
+    print ("Successfully created the directory %s" % path2)
+    print ("Successfully created the directory %s" % path3)
 
 # Read nodules csv
 csvlines = readCsv('../trainset_csv/trainNodules_gt.csv')
@@ -24,9 +49,11 @@ for n in nodules:
                 rads = list(map(int,list(n[header.index('RadID')].split(','))))
                 radfindings = list(map(int,list(n[header.index('RadFindingID')].split(','))))
                 finding = int(n[header.index('FindingID')])
-                
+                texts = list(map(float,list(n[header.index('Text')].split(','))))
+                #texts = int(n[header.index('Text')])
+
                 print(lnd,finding,rads,radfindings)
-                        
+                
                 # Read scan
                 if lnd!=lndloaded:
                         [scan,spacing,origin,transfmat] =  readMhd('../Dataset/LNDb-{:04}.mhd'.format(lnd))
@@ -36,10 +63,10 @@ for n in nodules:
                 # Convert coordinates to image
                 ctr = convertToImgCoord(ctr,origin,transfmat_toimg)                
                 
-                for rad,radfinding in zip(rads,radfindings):
+                for rad,radfinding,text in zip(rads,radfindings,texts):
                         # Read segmentation mask
                         # [mask,_,_,_] =  readMhd('masks/LNDb-{:04}_rad{}.mhd'.format(lnd,rad))
-                        
+
                         # Extract cube around nodule
                         scan_cube = extractCube(scan,spacing,ctr)
                         # masknod = copy.copy(mask)
@@ -66,9 +93,9 @@ for n in nodules:
                                 imx = cv2.normalize(scan_cube[int(scan_cube.shape[0]/2),:,:], imx, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
                                 imy = cv2.normalize(scan_cube[:,int(scan_cube.shape[1]/2),:], imy, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
                                 imz = cv2.normalize(scan_cube[:,:,int(scan_cube.shape[2]/2)], imz, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
-                                imwrite('../Dataset/images/LNDb-{:04d}_finding{}_x.png'.format(lnd, finding), imx)
-                                imwrite('../Dataset/images/LNDb-{:04d}_finding{}_y.png'.format(lnd, finding), imy)
-                                imwrite('../Dataset/images/LNDb-{:04d}_finding{}_z.png'.format(lnd, finding), imz)
+                                #imwrite('../Dataset/images/LNDb-{:04d}_finding{}_x.png'.format(lnd, finding), imx)
+                                #imwrite('../Dataset/images/LNDb-{:04d}_finding{}_y.png'.format(lnd, finding), imy)
+                                #imwrite('../Dataset/images/LNDb-{:04d}_finding{}_z.png'.format(lnd, finding), imz)
                                 imgs.append((lnd, finding))
 
                                 img = np.zeros((80, 80, 3))
@@ -77,7 +104,13 @@ for n in nodules:
                                 img[:,:,2] = imz
 
                                 img = cv2.normalize(img, img, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
-                                imwrite('../Dataset/images/merged/LNDb-{:04d}_finding{}.png'.format(lnd, finding), img)
+
+                                if text < 2.3:
+                                        imwrite('../Dataset/images/GGO/LNDb-{:04d}_finding{}.png'.format(lnd, finding), img)
+                                elif text >= 2.3 and text <= 3.6:
+                                        imwrite('../Dataset/images/PartSolid/LNDb-{:04d}_finding{}.png'.format(lnd, finding), img)
+                                elif text > 3.6:
+                                        imwrite('../Dataset/images/Solid/LNDb-{:04d}_finding{}.png'.format(lnd, finding), img)
 
                         # Save mask cubes
                         # np.save('mask_cubes/LNDb-{:04d}_finding{}_rad{}.npy'.format(lnd,finding,rad),mask_cube)                
