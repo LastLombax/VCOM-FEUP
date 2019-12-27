@@ -35,5 +35,6 @@ model.add(Activation('sigmoid'))
 model.compile(loss='binary_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
+y = np.array(y)
 
-model.fit(X, y, batch_size=32, epochs=3, validation_split=0.3)
+model.fit(X, y, batch_size=32, epochs=30, validation_split=0.3)
