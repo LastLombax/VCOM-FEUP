@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 DATADIR = "../Dataset/images"
 
-CATEGORIES = ["GGO", "PartSolid"]
+CATEGORIES = ["GGO", "PartSolid", "Solid"]
 
 IMG_SIZE = 80
 
@@ -48,7 +48,7 @@ for features,label in training_data:
     X.append(features)
     y.append(label)
 
-# Last arg is 3 for RGB and 1 for grayscale
+#1 because its made for grayscale
 print(X[0].reshape(-1, IMG_SIZE, IMG_SIZE, 1))
 
 X = np.array(X).reshape(-1, IMG_SIZE, IMG_SIZE, 1)
