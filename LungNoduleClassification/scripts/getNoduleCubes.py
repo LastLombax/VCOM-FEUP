@@ -42,8 +42,8 @@ nodules = csvlines[1:]
 
 lndloaded = -1
 for n in nodules:
-        vol = float(n[header.index('Volume')])
-        if nodEqDiam(vol)>3: #only get nodule cubes for nodules>3mm
+        nod = float(n[header.index('Nodule')])
+        if nod > 0: #only get nodule cubes for nodules>0
                 ctr = np.array([float(n[header.index('x')]), float(n[header.index('y')]), float(n[header.index('z')])])
                 lnd = int(n[header.index('LNDbID')])
                 rads = list(map(int,list(n[header.index('RadID')].split(','))))
