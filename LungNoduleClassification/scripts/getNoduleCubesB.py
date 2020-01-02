@@ -4,8 +4,10 @@ from matplotlib import pyplot as plt
 from utils import readMhd, readCsv, getImgWorldTransfMats, convertToImgCoord, extractCube
 from readNoduleList import nodEqDiam
 import os
+import sys
+np.set_printoptions(threshold=sys.maxsize)
 
-dispFlag = False
+dispFlag = True
 
 # define the name of the directory to be created
 path1 = "../Dataset/mask_cubes"
@@ -54,22 +56,24 @@ for n in nodules:
                 # Extract cube around nodule
                 scan_cube = extractCube(scan,spacing,ctr)
                 masknod = copy.copy(mask)
-                masknod[masknod!=rad] = 0
+                masknod[masknod!=finding] = 0 #is radfinding on other file.
                 masknod[masknod>0] = 1
                 mask_cube = extractCube(masknod,spacing,ctr, cube_size, voxel_size)
+
+                print(mask_cube)
                 
                 # Display mid slices from resampled scan/mask
                 if dispFlag:
                         fig, axs = plt.subplots(2,3)
                         axs[0,0].imshow(scan_cube[int(scan_cube.shape[0]/2),:,:])
                         axs[1,0].imshow(mask_cube[int(mask_cube.shape[0]/2),:,:])
+
                         axs[0,1].imshow(scan_cube[:,int(scan_cube.shape[1]/2),:])
                         axs[1,1].imshow(mask_cube[:,int(mask_cube.shape[1]/2),:])
+
                         axs[0,2].imshow(scan_cube[:,:,int(scan_cube.shape[2]/2)])
                         axs[1,2].imshow(mask_cube[:,:,int(mask_cube.shape[2]/2)])    
                         plt.show()
                 
                 # Save mask cubes
                 np.save('../Dataset/mask_cubes/LNDb-{:04d}_finding{}.npy'.format(lnd,finding),mask_cube)                
-        
-                
