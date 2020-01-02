@@ -16,13 +16,19 @@ NAME = "CNN-{}".format(int(time.time()))
 tensorboard = TensorBoard(log_dir="logs\{}".format(NAME))
 
 
-pickle_in = open("X.pickle","rb")
-X = pickle.load(pickle_in)
+pickle_in = open("X_train.pickle","rb")
+X_train = pickle.load(pickle_in)
 
-pickle_in = open("y.pickle","rb")
-y = pickle.load(pickle_in)
+pickle_in = open("y_train.pickle","rb")
+y_train = pickle.load(pickle_in)
 
-X = X/255.0
+pickle_in = open("X_test.pickle","rb")
+X_test = pickle.load(pickle_in)
+
+pickle_in = open("y_test.pickle","rb")
+y_test = pickle.load(pickle_in)
+
+X_train = X_train/255.0
 
 # model = Sequential()
 
@@ -75,5 +81,14 @@ model.compile(  loss='sparse_categorical_crossentropy',
                 metrics=['accuracy'])
 
 
-y = np.array(y)
-model.fit(X, y, batch_size=64, epochs=10, validation_split=0.3, callbacks=[tensorboard])
+y_train = np.array(y_train)
+y_test = np.array(y_test)
+
+X_test = np.array(X_test)
+
+# train the model 
+model.fit(X_train, y_train, batch_size=64, epochs=10, validation_split=0.3, callbacks=[tensorboard])
+
+# test the model
+score = model.evaluate(X_test, y_test)
+print("\nTest accuracy: %0.05f" % score[1])

@@ -41,31 +41,57 @@ random.shuffle(training_data)
 for sample in training_data[:10]:
     print(sample[1])
 
-X = []
-y = []
+X_train = []
+y_train = []
 
-for features,label in training_data:
-    X.append(features)
-    y.append(label)
+X_test = []
+y_test = []
+
+print(len(training_data))
+
+## 80% for train
+for features,label in training_data[:615]:
+    X_train.append(features)
+    y_train.append(label)
+
+## 20% for test
+for features,label in training_data[615:]:
+    X_test.append(features)
+    y_test.append(label)
 
 #1 because its made for grayscale
-print(X[0].reshape(-1, IMG_SIZE, IMG_SIZE, 3))
+print(X_train[0].reshape(-1, IMG_SIZE, IMG_SIZE, 3))
 
-X = np.array(X).reshape(-1, IMG_SIZE, IMG_SIZE, 3)
+X_train = np.array(X_train).reshape(-1, IMG_SIZE, IMG_SIZE, 3)
 
 import pickle
 
-pickle_out = open("X.pickle","wb")
-pickle.dump(X, pickle_out)
+pickle_out = open("X_train.pickle","wb")
+pickle.dump(X_train, pickle_out)
 pickle_out.close()
 
-pickle_out = open("y.pickle","wb")
-pickle.dump(y, pickle_out)
+pickle_out = open("y_train.pickle","wb")
+pickle.dump(y_train, pickle_out)
+pickle_out.close()
+
+pickle_out = open("X_test.pickle","wb")
+pickle.dump(X_test, pickle_out)
+pickle_out.close()
+
+pickle_out = open("y_test.pickle","wb")
+pickle.dump(y_test, pickle_out)
 pickle_out.close()
 
 
-pickle_in = open("X.pickle","rb")
-X = pickle.load(pickle_in)
 
-pickle_in = open("y.pickle","rb")
-y = pickle.load(pickle_in)
+pickle_in = open("X_train.pickle","rb")
+X_train = pickle.load(pickle_in)
+
+pickle_in = open("y_train.pickle","rb")
+y_train = pickle.load(pickle_in)
+
+pickle_in = open("X_test.pickle","rb")
+X_test = pickle.load(pickle_in)
+
+pickle_in = open("y_test.pickle","rb")
+y_test = pickle.load(pickle_in)
