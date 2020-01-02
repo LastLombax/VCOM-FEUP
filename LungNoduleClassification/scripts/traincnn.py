@@ -9,6 +9,7 @@ from tensorflow.keras.callbacks import TensorBoard
 import pickle
 import time
 
+from sklearn.metrics import classification_report
 
 #unique name for model that has been trained
 NAME = "CNN-{}".format(int(time.time()))
@@ -92,3 +93,15 @@ model.fit(X_train, y_train, batch_size=64, epochs=10, validation_split=0.3, call
 # test the model
 score = model.evaluate(X_test, y_test)
 print("\nTest accuracy: %0.05f" % score[1])
+
+X_test = tf.convert_to_tensor(X_test,dtype=tf.int32)
+y_test = tf.convert_to_tensor(y_test,dtype=tf.int32)
+
+
+# needed conversion in order to work bellow
+X_test = np.array(X_test).astype(np.float32)
+
+# classification report
+y_pred = model.predict(X_test, batch_size=64, verbose=1)
+y_pred_bool = np.argmax(y_pred, axis=1)
+print(classification_report(y_test, y_pred_bool))
