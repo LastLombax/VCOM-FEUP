@@ -1,0 +1,23 @@
+--Automated Lung Nodule Detection and Classification Using Deep Learning 
+Combined with Multiple Strategies
+
+we have used two deep three-dimensional (3D) customized mixed link network (CMixNet) 
+architectures for lung nodule detection and classification, respectively. 
+Nodule detections were performed through faster R-CNN on efficiently-learned 
+features from CMixNet and U-Net like encoder–decoder architecture. 
+Classification of the nodules was performed through a gradient boosting machine (GBM) 
+on the learned features from the designed 3D CMixNet structure. 
+
+-- 
+
+An Appraisal of Lung Nodules Automatic
+Classification Algorithms for CT Images
+
+
+Modern computer vision and machine learning technologies allow very fast and reliable 
+CT image classification. 
+This research area has become very hot for its high efficiency and labor saving. 
+The paper aims to draw a systematic review of the state of the art of automatic 
+classification of lung nodules. 
+This research paper covers published works selected from the 
+Web of Science, IEEEXplore, and DBLP databases up to June 2018
