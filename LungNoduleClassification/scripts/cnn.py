@@ -12,19 +12,27 @@ def main():
     nb_filters = 32
     pool_size = (2, 2)
     kernel_size = (3, 3)
+
     model = Sequential()
     model.add(Convolution2D(nb_filters, kernel_size, padding='valid', input_shape=input_shape))
     model.add(Activation('relu'))
+    
     model.add(Convolution2D(nb_filters, kernel_size))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=pool_size))
+
     model.add(Dropout(0.25))
+
     model.add(Flatten())
+
     model.add(Dense(128))
     model.add(Activation('relu'))
+    
     model.add(Dropout(0.5))
+
     model.add(Dense(10))
     model.add(Activation('softmax'))
+
     model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
     ## train the model
     history = model.fit(x_train, y_train, batch_size=64, epochs=3, verbose=1, validation_split=0.1)
