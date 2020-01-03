@@ -5,7 +5,6 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
 from tensorflow.keras.layers import Conv2D, Convolution2D, MaxPooling2D, BatchNormalization
 import numpy as np
-from loadData import create_training_data
 from tensorflow.keras.callbacks import TensorBoard
 import pickle
 import time

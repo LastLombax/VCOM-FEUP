@@ -80,15 +80,17 @@ def create_training_data(sample_type, sample_ratio, test_ratio):
     X_test = []
     y_test = []
 
-    nr_samples = len(training_data) - int(test_ratio * len(training_data))
+    nr_training_samples = len(training_data) - int(test_ratio * len(training_data))
+
+    print(" Total number of test samples: ", int(len(training_data) - nr_training_samples), "\n")
 
     ## 80% for train
-    for features,label in training_data[:nr_samples]:
+    for features,label in training_data[:nr_training_samples]:
         X_train.append(features)
         y_train.append(label)
 
     ## 20% for test
-    for features,label in training_data[nr_samples:]:
+    for features,label in training_data[nr_training_samples:]:
         X_test.append(features)
         y_test.append(label)
 
@@ -132,4 +134,4 @@ def create_training_data(sample_type, sample_ratio, test_ratio):
 # (1) sample_type : 0 for nothing, 1 for undersample and 2 for oversample
 # (2) sample_ratio: ignored if sample_type is 0. For over and under sample is the percentage of (over or under) sampling given the training_data
 # (3) test_ratio: percentage of test samples considering the training data 
-create_training_data(1, 0.5, 0.2)
+create_training_data(0, 0, 0.2)
