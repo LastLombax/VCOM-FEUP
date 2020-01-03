@@ -11,11 +11,19 @@ import time
 import traincnn
 
 
+from sklearn.metrics import classification_report
+
 pickle_in = open("X_train.pickle","rb")
 X = pickle.load(pickle_in)
 
 pickle_in = open("y_train.pickle","rb")
 y = pickle.load(pickle_in)
+
+pickle_in = open("X_test.pickle","rb")
+X_test = pickle.load(pickle_in)
+
+pickle_in = open("y_test.pickle","rb")
+y_test = pickle.load(pickle_in)
 
 X = X/255.0
 
@@ -36,3 +44,14 @@ for dense_layer in dense_layers:
 
             y = np.array(y)
             model.fit(X, y, batch_size=64, epochs=10, validation_split=0.3, callbacks=[tensorboard])
+
+            X_test = tf.convert_to_tensor(X_test,dtype=tf.int32)
+            y_test = tf.convert_to_tensor(y_test,dtype=tf.int32)
+
+            # needed conversion in order to work bellow
+            X_test = np.array(X_test).astype(np.float32)
+
+            # classification report
+            y_pred = model.predict(X_test, batch_size=64, verbose=1)
+            y_pred_bool = np.argmax(y_pred, axis=1)
+            print(classification_report(y_test, y_pred_bool))
