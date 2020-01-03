@@ -117,8 +117,6 @@ def create_training_data(sample_type, sample_ratio, test_ratio):
     pickle.dump(y_test, pickle_out)
     pickle_out.close()
 
-
-
     pickle_in = open("X_train.pickle","rb")
     X_train = pickle.load(pickle_in)
 
