@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import os
 import cv2
 from tqdm import tqdm
+import random
 
 DATADIR = "../Dataset/images"
 
@@ -12,7 +13,13 @@ IMG_SIZE = 80
 
 training_data = []
 
-def create_training_data():
+# sample_type : 0 for nothing, 1 for undersample and 2 for oversample
+# sample_ratio: ignored if sample_type is 0. For over and under sample is the percentage of (over or under) sampling given the training_data
+# test_ratio: percentage of test samples considering the training data 
+def create_training_data(sample_type, sample_ratio, test_ratio):
+    ggo = []
+    partSolid = []
+    solid = []
     for category in CATEGORIES:  # do ggo, ps and s
 
         path = os.path.join(DATADIR,category)  # create path to ggo, ps and s
@@ -22,76 +29,107 @@ def create_training_data():
             try:
                 img_array = cv2.imread(os.path.join(path,img))  # convert to array
                 #new_array = cv2.resize(img_array, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
-                training_data.append([img_array, class_num])  # add this to our training_data
+                if category == "GGO":
+                    ggo.append([img_array, class_num])  # add this to our training_data
+                elif category == "PartSolid":
+                    partSolid.append([img_array, class_num])  # add this to our training_data
+                elif category == "Solid":
+                    solid.append([img_array, class_num])  # add this to our training_data
             except Exception as e:  # in the interest in keeping the output clean...
                 pass
             #except OSError as e:
             #    print("OSErrroBad img most likely", e, os.path.join(path,img))
             #except Exception as e:
             #    print("general exception", e, os.path.join(path,img))
+    random.shuffle(ggo)
+    random.shuffle(partSolid)
+    random.shuffle(solid)
 
-create_training_data()
+    training_data = ggo + partSolid + solid
 
-print(len(training_data))
+    print(" (Before Sampling) Number of GGO images: ", len(ggo))
+    print(" (Before Sampling) Number of PartSolid images: ", len(partSolid))
+    print(" (Before Sampling) Number of Solid images: ", len(solid))
 
-import random
+    print(" (Before Sampling) Total number of images: ", len(training_data), "\n")
 
-random.shuffle(training_data)
+    # undersample
+    if (sample_type == 1):
+        solid = random.sample(solid, int(sample_ratio * len(solid)))
+    # oversample 
+    elif (sample_type == 2):
+        #it is being done......
+        solid = solid
 
-for sample in training_data[:10]:
-    print(sample[1])
+    training_data = ggo + partSolid + solid
 
-X_train = []
-y_train = []
+    print(" (After Sampling) Number of GGO images: ", len(ggo))
+    print(" (After Sampling) Number of PartSolid images: ", len(partSolid))
+    print(" (After Sampling) Number of Solid images: ", len(solid))
 
-X_test = []
-y_test = []
+    print(" (After Samples) Total number of images: ", len(training_data), "\n")
 
-print(len(training_data))
+    random.shuffle(training_data)
 
-## 80% for train
-for features,label in training_data[:615]:
-    X_train.append(features)
-    y_train.append(label)
+    #for sample in training_data[:10]:
+        #print(sample[1])
 
-## 20% for test
-for features,label in training_data[615:]:
-    X_test.append(features)
-    y_test.append(label)
+    X_train = []
+    y_train = []
 
-#1 because its made for grayscale
-print(X_train[0].reshape(-1, IMG_SIZE, IMG_SIZE, 3))
+    X_test = []
+    y_test = []
 
-X_train = np.array(X_train).reshape(-1, IMG_SIZE, IMG_SIZE, 3)
+    nr_samples = len(training_data) - int(test_ratio * len(training_data))
 
-import pickle
+    ## 80% for train
+    for features,label in training_data[:nr_samples]:
+        X_train.append(features)
+        y_train.append(label)
 
-pickle_out = open("X_train.pickle","wb")
-pickle.dump(X_train, pickle_out)
-pickle_out.close()
+    ## 20% for test
+    for features,label in training_data[nr_samples:]:
+        X_test.append(features)
+        y_test.append(label)
 
-pickle_out = open("y_train.pickle","wb")
-pickle.dump(y_train, pickle_out)
-pickle_out.close()
+    #1 because its made for grayscale
+    #print(X_train[0].reshape(-1, IMG_SIZE, IMG_SIZE, 3))
 
-pickle_out = open("X_test.pickle","wb")
-pickle.dump(X_test, pickle_out)
-pickle_out.close()
+    X_train = np.array(X_train).reshape(-1, IMG_SIZE, IMG_SIZE, 3)
 
-pickle_out = open("y_test.pickle","wb")
-pickle.dump(y_test, pickle_out)
-pickle_out.close()
+    import pickle
+
+    pickle_out = open("X_train.pickle","wb")
+    pickle.dump(X_train, pickle_out)
+    pickle_out.close()
+
+    pickle_out = open("y_train.pickle","wb")
+    pickle.dump(y_train, pickle_out)
+    pickle_out.close()
+
+    pickle_out = open("X_test.pickle","wb")
+    pickle.dump(X_test, pickle_out)
+    pickle_out.close()
+
+    pickle_out = open("y_test.pickle","wb")
+    pickle.dump(y_test, pickle_out)
+    pickle_out.close()
 
 
 
-pickle_in = open("X_train.pickle","rb")
-X_train = pickle.load(pickle_in)
+    pickle_in = open("X_train.pickle","rb")
+    X_train = pickle.load(pickle_in)
 
-pickle_in = open("y_train.pickle","rb")
-y_train = pickle.load(pickle_in)
+    pickle_in = open("y_train.pickle","rb")
+    y_train = pickle.load(pickle_in)
 
-pickle_in = open("X_test.pickle","rb")
-X_test = pickle.load(pickle_in)
+    pickle_in = open("X_test.pickle","rb")
+    X_test = pickle.load(pickle_in)
 
-pickle_in = open("y_test.pickle","rb")
-y_test = pickle.load(pickle_in)
+    pickle_in = open("y_test.pickle","rb")
+    y_test = pickle.load(pickle_in)
+
+# (1) sample_type : 0 for nothing, 1 for undersample and 2 for oversample
+# (2) sample_ratio: ignored if sample_type is 0. For over and under sample is the percentage of (over or under) sampling given the training_data
+# (3) test_ratio: percentage of test samples considering the training data 
+create_training_data(1, 0.5, 0.2)
