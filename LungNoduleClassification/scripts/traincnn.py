@@ -89,10 +89,10 @@ def performance_stats(model):
     X_test = np.array(X_test)
 
     # train the model 
-    model_1.fit(X_train, y_train, batch_size=64, epochs=10, validation_split=0.15, callbacks=[tensorboard])
+    model.fit(X_train, y_train, batch_size=64, epochs=10, validation_split=0.15, callbacks=[tensorboard])
 
     # test the model
-    score = model_1.evaluate(X_test, y_test)
+    score = model.evaluate(X_test, y_test)
     print("\nTest accuracy: %0.05f" % score[1], "\n")
 
     X_test = tf.convert_to_tensor(X_test,dtype=tf.int32)
@@ -102,10 +102,9 @@ def performance_stats(model):
     X_test = np.array(X_test).astype(np.float32)
 
     # classification report
-    y_pred = model_1.predict(X_test, batch_size=64, verbose=1)
+    y_pred = model.predict(X_test, batch_size=64, verbose=1)
     y_pred_bool = np.argmax(y_pred, axis=1)
     print(classification_report(y_test, y_pred_bool))
-
 
 
 #build model
