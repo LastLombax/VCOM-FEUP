@@ -1,0 +1,9 @@
+SimpleITK
+imageio
+opencv-python
+matplotlib
+tqdm
+numpy
+tensorflow
+tensorboard 
+sklearn
