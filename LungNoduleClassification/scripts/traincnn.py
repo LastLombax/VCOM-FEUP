@@ -65,7 +65,7 @@ def create_model(layer_size, dense_layers, conv_layers):
     model.add(Activation('softmax')) # or sigmoid?
 
     model.compile(loss='sparse_categorical_crossentropy', 
-                  optimizer='adadelta',
+                  optimizer='adam',
                   metrics=['accuracy'])
     return model
 
