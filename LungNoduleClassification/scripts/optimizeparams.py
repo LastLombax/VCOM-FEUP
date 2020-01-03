@@ -8,6 +8,7 @@ import numpy as np
 from tensorflow.keras.callbacks import TensorBoard
 import pickle
 import time
+import traincnn
 
 
 pickle_in = open("X.pickle","rb")
@@ -30,31 +31,8 @@ for dense_layer in dense_layers:
         for conv_layer in conv_layers:
             NAME = "{}-conv-{}-nodes-{}-dense-{}".format(conv_layer, layer_size, dense_layer, int(time.time())) #unique name for model that has been trained
             tensorboard = TensorBoard(log_dir="logs\{}".format(NAME))
-            model = Sequential()
-
-            model.add(Convolution2D(layer_size, kernel_size, padding='valid', input_shape=(80, 80, 3)))
-            model.add(Activation('relu'))
-
-            for l in range(conv_layer-1):
-                model.add(Convolution2D(layer_size, kernel_size))
-                model.add(Activation('relu'))
-                model.add(MaxPooling2D(pool_size=pool_size))
-
-            model.add(Flatten()) # this converts our 3D feature maps to 1D feature vectors
-            for l in range(dense_layer):    
-                model.add(Dense(layer_size))
-                model.add(Activation('relu'))
-
-            #model.add(Dropout(0.25))
-            #model.add(Dropout(0.5))
-
-            model.add(Dense(3))
-            model.add(Activation('softmax')) # or sigmoid?
-
-            model.compile(  loss='sparse_categorical_crossentropy', 
-                            optimizer='adadelta',
-                            metrics=['accuracy'])
-
+            
+            model = traincnn.create_model(layer_size, dense_layer, conv_layer)
 
             y = np.array(y)
             model.fit(X, y, batch_size=64, epochs=10, validation_split=0.3, callbacks=[tensorboard])

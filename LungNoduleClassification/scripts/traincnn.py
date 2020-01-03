@@ -37,35 +37,36 @@ tensorboard = TensorBoard(log_dir="logs\{}".format(NAME))
 #               optimizer='adam',
 #               metrics=['accuracy'])
 
-def build_model_1():
-    nb_filters = 64
+def create_model(layer_size, dense_layers, conv_layers):
     pool_size = (2, 2)
     kernel_size = (5, 5)
 
     model = Sequential()
 
-    model.add(Convolution2D(nb_filters, kernel_size, padding='valid', input_shape=(80, 80, 3)))
+    model.add(Convolution2D(layer_size, kernel_size, padding='valid', input_shape=(80, 80, 3)))
     model.add(Activation('relu'))
 
-    model.add(Convolution2D(nb_filters, kernel_size))
-    model.add(Activation('relu'))
+    for l in range(conv_layers - 1):
+        model.add(Convolution2D(layer_size, kernel_size))
+        model.add(Activation('relu'))
+    
     model.add(MaxPooling2D(pool_size=pool_size))
 
     model.add(Dropout(0.25))
 
     model.add(Flatten()) # this converts our 3D feature maps to 1D feature vectors
-
-    model.add(Dense(128))
-    model.add(Activation('relu'))
-
-    model.add(Dropout(0.5))
+    
+    for l in range(dense_layers):    
+        model.add(Dense(layer_size))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.5))
 
     model.add(Dense(3))
-    model.add(Activation('softmax'))
+    model.add(Activation('softmax')) # or sigmoid?
 
-    model.compile(  loss='sparse_categorical_crossentropy', 
-                    optimizer='adadelta',
-                    metrics=['accuracy'])
+    model.compile(loss='sparse_categorical_crossentropy', 
+                  optimizer='adadelta',
+                  metrics=['accuracy'])
     return model
 
 
@@ -108,7 +109,7 @@ def performance_stats(model):
 
 
 #build model
-model_1 = build_model_1()
+model_1 = create_model(64, 2, 2)
 
 #check performance
 performance_stats(model_1)

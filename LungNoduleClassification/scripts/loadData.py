@@ -67,7 +67,7 @@ def create_training_data(sample_type, sample_ratio, test_ratio):
     print(" (After Sampling) Number of PartSolid images: ", len(partSolid))
     print(" (After Sampling) Number of Solid images: ", len(solid))
 
-    print(" (After Samples) Total number of images: ", len(training_data), "\n")
+    print(" (After Sampling) Total number of images: ", len(training_data), "\n")
 
     random.shuffle(training_data)
 
