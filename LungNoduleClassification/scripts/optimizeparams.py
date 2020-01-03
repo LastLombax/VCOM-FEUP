@@ -11,10 +11,10 @@ import time
 import traincnn
 
 
-pickle_in = open("X.pickle","rb")
+pickle_in = open("X_train.pickle","rb")
 X = pickle.load(pickle_in)
 
-pickle_in = open("y.pickle","rb")
+pickle_in = open("y_train.pickle","rb")
 y = pickle.load(pickle_in)
 
 X = X/255.0
