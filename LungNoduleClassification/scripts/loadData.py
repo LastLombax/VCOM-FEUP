@@ -12,6 +12,7 @@ CATEGORIES = ["GGO", "PartSolid", "Solid"]
 IMG_SIZE = 80
 
 training_data = []
+test_data = []
 
 # sample_type : 0 for nothing, 1 for undersample and 2 for oversample
 # sample_ratio: ignored if sample_type is 0. For over and under sample is the percentage of (over or under) sampling given the training_data
@@ -45,7 +46,25 @@ def create_training_data(sample_type, sample_ratio, test_ratio):
     random.shuffle(partSolid)
     random.shuffle(solid)
 
+    ggo_test = []
+    partsolid_test = []
+    solid_test = []
+
+    ggo = ggo[:28]
+    ggo_test = ggo[-10:]
+
+    partSolid = partSolid[:43]
+    partsolid_test = partSolid[-15:]
+
+    solid = solid[:622]
+    solid_test = solid[-50:]
+
     training_data = ggo + partSolid + solid
+    test_data = ggo_test + partsolid_test + solid_test
+
+    random.shuffle(test_data)
+
+    print("Number of test samples (10 from ggo, 15 from partSolid and 50 from solid): ", len(test_data))
 
     print(" (Before Sampling) Number of GGO images: ", len(ggo))
     print(" (Before Sampling) Number of PartSolid images: ", len(partSolid))
@@ -94,17 +113,17 @@ def create_training_data(sample_type, sample_ratio, test_ratio):
     X_test = []
     y_test = []
 
-    nr_training_samples = len(training_data) - int(test_ratio * len(training_data))
+    #nr_training_samples = len(training_data) - int(test_ratio * len(training_data))
 
-    print(" Total number of test samples: ", int(len(training_data) - nr_training_samples), "\n")
+    #print(" Total number of test samples: ", int(len(training_data) - nr_training_samples), "\n")
 
     ## 80% for train
-    for features,label in training_data[:nr_training_samples]:
+    for features,label in training_data:
         X_train.append(features)
         y_train.append(label)
 
     ## 20% for test
-    for features,label in training_data[nr_training_samples:]:
+    for features,label in test_data:
         X_test.append(features)
         y_test.append(label)
 
@@ -146,4 +165,4 @@ def create_training_data(sample_type, sample_ratio, test_ratio):
 # (1) sample_type : 0 for nothing, 1 for undersample and 2 for oversample
 # (2) sample_ratio: ignored if sample_type is 0. For over and under sample is the percentage of (over or under) sampling given the training_data
 # (3) test_ratio: percentage of test samples considering the training data 
-create_training_data(2, 17, 0.2)
+create_training_data(2, 19, 0.3)
