@@ -58,8 +58,22 @@ def create_training_data(sample_type, sample_ratio, test_ratio):
         solid = random.sample(solid, int(sample_ratio * len(solid)))
     # oversample 
     elif (sample_type == 2):
-        #it is being done......
-        solid = solid
+        ggo_extend = []
+        partSolid_extend = []
+        for image in ggo:
+            i = 1
+            while i < round(sample_ratio):
+                new_img = image.copy()
+                ggo_extend.append(new_img)
+                i+=1
+        for image in partSolid:
+            i = 1
+            while i < round(sample_ratio/(len(partSolid)/len(ggo))):
+                new_img = image.copy()
+                partSolid_extend.append(new_img)
+                i+=1
+        ggo = ggo + ggo_extend
+        partSolid = partSolid + partSolid_extend
 
     training_data = ggo + partSolid + solid
 
@@ -132,4 +146,4 @@ def create_training_data(sample_type, sample_ratio, test_ratio):
 # (1) sample_type : 0 for nothing, 1 for undersample and 2 for oversample
 # (2) sample_ratio: ignored if sample_type is 0. For over and under sample is the percentage of (over or under) sampling given the training_data
 # (3) test_ratio: percentage of test samples considering the training data 
-create_training_data(1, 0.08, 0.2)
+create_training_data(2, 17, 0.2)
