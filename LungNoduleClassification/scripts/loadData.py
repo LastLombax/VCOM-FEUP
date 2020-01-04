@@ -165,4 +165,4 @@ def create_training_data(sample_type, sample_ratio, test_ratio):
 # (1) sample_type : 0 for nothing, 1 for undersample and 2 for oversample
 # (2) sample_ratio: ignored if sample_type is 0. For over and under sample is the percentage of (over or under) sampling given the training_data
 # (3) test_ratio: percentage of test samples considering the training data 
-create_training_data(2, 19, 0.3)
+create_training_data(0, 19, 0.3)

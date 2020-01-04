@@ -8,6 +8,7 @@ import numpy as np
 from tensorflow.keras.callbacks import TensorBoard
 import pickle
 import time
+from collections import Counter 
 
 from sklearn.metrics import classification_report
 
@@ -69,6 +70,10 @@ def create_model(layer_size, dense_layers, conv_layers):
                   metrics=['accuracy'])
     return model
 
+def get_class_weights(y):
+    counter = Counter(y)
+    majority = max(counter.values())
+    return  {cls: float(majority/count) for cls, count in counter.items()}
 
 def performance_stats(model):
     pickle_in = open("X_train.pickle","rb")
@@ -89,8 +94,15 @@ def performance_stats(model):
 
     X_test = np.array(X_test)
 
+    #class_weight = {2: 1., 1: 10., 2: 2.}
+
+    class_weights = get_class_weights(y_train)
+
+    print(class_weights)
+
     # train the model 
     model.fit(X_train, y_train, batch_size=64, epochs=10, validation_split=0.15)
+    #model.fit(X_train, y_train, batch_size=64, epochs=10, validation_split=0.15, class_weight=class_weights)
 
     # test the model
     score = model.evaluate(X_test, y_test)
@@ -103,8 +115,8 @@ def performance_stats(model):
     X_test = np.array(X_test).astype(np.float32)
 
     # # classification report
-    # y_pred = model.predict(X_test, batch_size=64, verbose=1)
-    # y_pred_bool = np.argmax(y_pred, axis=1)
+    y_pred = model.predict(X_test, batch_size=64, verbose=1)
+    y_pred_bool = np.argmax(y_pred, axis=1)
     # print(classification_report(y_test, y_pred_bool))
 
     # test the model
