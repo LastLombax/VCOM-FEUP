@@ -50,14 +50,14 @@ def create_training_data(sample_type, sample_ratio, test_ratio):
     partsolid_test = []
     solid_test = []
 
-    ggo = ggo[:28]
     ggo_test = ggo[-10:]
+    ggo = ggo[:28]
 
-    partSolid = partSolid[:43]
     partsolid_test = partSolid[-15:]
+    partSolid = partSolid[:43]
 
-    solid = solid[:622]
     solid_test = solid[-50:]
+    solid = solid[:622]
 
     training_data = ggo + partSolid + solid
     test_data = ggo_test + partsolid_test + solid_test
