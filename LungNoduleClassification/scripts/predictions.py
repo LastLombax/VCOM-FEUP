@@ -19,7 +19,7 @@ def predict_values(modelName, pathImage):
 
 def main():
     pathImage = "../Dataset/images/PartSolid/LNDb-0015_finding1.png"
-    pred = predict_values("qq.model", pathImage)
+    pred = predict_values("62_2_2.model", pathImage)
     print(pred)
 
 main()
