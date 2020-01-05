@@ -146,7 +146,6 @@ def performance_stats(model):
 
     # train the model 
     model.fit(X_train, y_train, batch_size=64, epochs=10, validation_split=0.3, callbacks=[tensorboard])
-    #model.fit(X_train, y_train, batch_size=64, epochs=10, validation_split=0.15, class_weight=class_weights)
 
     # test the model
     score = model.evaluate(X_test, y_test)

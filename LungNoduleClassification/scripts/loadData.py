@@ -29,7 +29,6 @@ def create_training_data(sample_type, sample_ratio, test_ratio):
         for img in tqdm(os.listdir(path)):  # iterate over each image per ggo, ps and s
             try:
                 img_array = cv2.imread(os.path.join(path,img))  # convert to array
-                #new_array = cv2.resize(img_array, (IMG_SIZE, IMG_SIZE))  # resize to normalize data size
                 if category == "GGO":
                     ggo.append([img_array, class_num])  # add this to our training_data
                 elif category == "PartSolid":
@@ -38,10 +37,7 @@ def create_training_data(sample_type, sample_ratio, test_ratio):
                     solid.append([img_array, class_num])  # add this to our training_data
             except Exception as e:  # in the interest in keeping the output clean...
                 pass
-            #except OSError as e:
-            #    print("OSErrroBad img most likely", e, os.path.join(path,img))
-            #except Exception as e:
-            #    print("general exception", e, os.path.join(path,img))
+         
     random.shuffle(ggo)
     random.shuffle(partSolid)
     random.shuffle(solid)
@@ -104,18 +100,11 @@ def create_training_data(sample_type, sample_ratio, test_ratio):
 
     random.shuffle(training_data)
 
-    #for sample in training_data[:10]:
-        #print(sample[1])
-
     X_train = []
     y_train = []
 
     X_test = []
     y_test = []
-
-    #nr_training_samples = len(training_data) - int(test_ratio * len(training_data))
-
-    #print(" Total number of test samples: ", int(len(training_data) - nr_training_samples), "\n")
 
     ## 80% for train
     for features,label in training_data:
@@ -126,9 +115,6 @@ def create_training_data(sample_type, sample_ratio, test_ratio):
     for features,label in test_data:
         X_test.append(features)
         y_test.append(label)
-
-    #1 because its made for grayscale
-    #print(X_train[0].reshape(-1, IMG_SIZE, IMG_SIZE, 3))
 
     X_train = np.array(X_train).reshape(-1, IMG_SIZE, IMG_SIZE, 3)
 
@@ -165,5 +151,4 @@ def create_training_data(sample_type, sample_ratio, test_ratio):
 # (1) sample_type : 0 for nothing, 1 for undersample and 2 for oversample
 # (2) sample_ratio: ignored if sample_type is 0. For over and under sample is the percentage of (over or under) sampling given the training_data
 # (3) test_ratio: percentage of test samples considering the training data 
-#create_training_data(0, 19, 0.3)
 create_training_data(2, 19, 0.3)
