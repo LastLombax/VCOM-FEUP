@@ -50,6 +50,9 @@ for dense_layer in dense_layers:
             y = np.array(y)
             model.fit(X, y, batch_size=64, epochs=10, validation_split=0.3, callbacks=[tensorboard])
 
+            #save model
+            model.save(NAME+'.model')
+
             X_test = tf.convert_to_tensor(X_test,dtype=tf.int32)
             y_test = tf.convert_to_tensor(y_test,dtype=tf.int32)
 

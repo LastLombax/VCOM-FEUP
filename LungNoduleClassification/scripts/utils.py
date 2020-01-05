@@ -5,6 +5,20 @@ import numpy as np
 import SimpleITK as sitk
 from scipy.ndimage import zoom
 
+import tensorflow as tf
+from tensorflow.keras.datasets import cifar10
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
+from tensorflow.keras.layers import Conv2D, Convolution2D, MaxPooling2D, BatchNormalization
+from tensorflow.keras.callbacks import TensorBoard
+import pickle
+import time
+
+from collections import Counter 
+
+from sklearn.metrics import classification_report
+
 def readCsv(csvfname):
     # read csv to list of lists
     with open(csvfname, 'r') as csvf:
