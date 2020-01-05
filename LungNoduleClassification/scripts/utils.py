@@ -76,6 +76,98 @@ def extractCube(scan,spacing,xyz,cube_size=80,cube_size_mm=51):
     
     return scancube
 
+def create_model(layer_size, dense_layers, conv_layers):
+    pool_size = (2, 2)
+    kernel_size = (5, 5)
+
+    model = Sequential()
+
+    model.add(Convolution2D(layer_size, kernel_size, padding='valid', input_shape=(80, 80, 3)))
+    model.add(Activation('relu'))
+
+    for l in range(conv_layers - 1):
+        model.add(Convolution2D(layer_size, kernel_size))
+        model.add(Activation('relu'))
+    
+    model.add(MaxPooling2D(pool_size=pool_size))
+
+    model.add(Dropout(0.25))
+
+    model.add(Flatten()) # this converts our 3D feature maps to 1D feature vectors
+    
+    for l in range(dense_layers):    
+        model.add(Dense(layer_size))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.5))
+
+    model.add(Dense(3))
+    model.add(Activation('softmax')) # or sigmoid?
+
+    model.compile(loss='sparse_categorical_crossentropy', 
+                  optimizer='adam',
+                  metrics=['accuracy'])
+    return model
+
+def get_class_weights(y):
+    counter = Counter(y)
+    majority = max(counter.values())
+    return  {cls: float(majority/count) for cls, count in counter.items()}
+
+def performance_stats(model):
+    pickle_in = open("X_train.pickle","rb")
+    X_train = pickle.load(pickle_in)
+
+    pickle_in = open("y_train.pickle","rb")
+    y_train = pickle.load(pickle_in)
+
+    pickle_in = open("X_test.pickle","rb")
+    X_test = pickle.load(pickle_in)
+
+    pickle_in = open("y_test.pickle","rb")
+    y_test = pickle.load(pickle_in)
+
+    X_train = X_train/255.0
+
+    y_train = np.array(y_train)
+    y_test = np.array(y_test)
+
+    X_test = np.array(X_test)
+    X_test = X_test/255.0
+
+    #class_weight = {2: 1., 1: 10., 2: 2.}
+
+    class_weights = get_class_weights(y_train)
+
+    print(class_weights)
+
+    #unique name for model that has been trained
+    NAME = "CNN{}".format(int(time.time())) #unique name for model that has been trained
+    tensorboard = TensorBoard(log_dir="logs\{}".format(NAME))
+
+    # train the model 
+    model.fit(X_train, y_train, batch_size=64, epochs=10, validation_split=0.3, callbacks=[tensorboard])
+    #model.fit(X_train, y_train, batch_size=64, epochs=10, validation_split=0.15, class_weight=class_weights)
+
+    # test the model
+    score = model.evaluate(X_test, y_test)
+    print("\nTest accuracy: %0.05f" % score[1], "\n")
+
+    X_test = tf.convert_to_tensor(X_test,dtype=tf.int32)
+    y_test = tf.convert_to_tensor(y_test,dtype=tf.int32)
+
+    # needed conversion in order to work bellow
+    X_test = np.array(X_test).astype(np.float32)
+
+    # classification report
+    y_pred = model.predict(X_test, batch_size=64, verbose=1)
+    y_pred_bool = np.argmax(y_pred, axis=1)
+    print(classification_report(y_test, y_pred_bool))
+
+    model_score = open("model_scores.txt", "a")
+    model_score.write(NAME + "\n")
+    model_score.write(classification_report(y_test, y_pred_bool) + "\r\n")
+    model_score.close()
+
 if __name__ == "__main__":
     #Extract and display cube for example nodule
     lnd = 1

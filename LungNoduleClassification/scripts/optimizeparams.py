@@ -8,7 +8,7 @@ import numpy as np
 from tensorflow.keras.callbacks import TensorBoard
 import pickle
 import time
-import traincnn
+import utils
 
 
 from sklearn.metrics import classification_report
@@ -27,6 +27,11 @@ y_test = pickle.load(pickle_in)
 
 X = X/255.0
 
+X_test = np.array(X_test)
+X_test = X_test/255.0
+
+score_file = open("model_scores.txt", "a")
+
 dense_layers = [1, 2, 3]
 layer_sizes = [32, 64, 128]
 conv_layers = [1, 2, 3]
@@ -40,7 +45,7 @@ for dense_layer in dense_layers:
             NAME = "{}-conv-{}-nodes-{}-dense-{}".format(conv_layer, layer_size, dense_layer, int(time.time())) #unique name for model that has been trained
             tensorboard = TensorBoard(log_dir="logs\{}".format(NAME))
             
-            model = traincnn.create_model(layer_size, dense_layer, conv_layer)
+            model = utils.create_model(layer_size, dense_layer, conv_layer)
 
             y = np.array(y)
             model.fit(X, y, batch_size=64, epochs=10, validation_split=0.3, callbacks=[tensorboard])
@@ -55,3 +60,8 @@ for dense_layer in dense_layers:
             y_pred = model.predict(X_test, batch_size=64, verbose=1)
             y_pred_bool = np.argmax(y_pred, axis=1)
             print(classification_report(y_test, y_pred_bool))
+            
+            score_file.write(NAME + "\n")
+            score_file.write(classification_report(y_test, y_pred_bool) + "\r\n")
+
+score_file.close()
